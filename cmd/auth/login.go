@@ -6,15 +6,11 @@ import (
 
 	"encoding/json"
 
-	"os"
-
 	"github.com/alecthomas/kingpin"
-	"github.com/howeyc/gopass"
 	"github.com/sandwichcloud/deli-cli/api"
-	"github.com/sandwichcloud/deli-cli/api/client/auth"
 	"github.com/sandwichcloud/deli-cli/cmd"
+	"github.com/sandwichcloud/deli-cli/utils"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/oauth2"
 )
 
 type loginCommand struct {
@@ -40,8 +36,6 @@ func (c *loginCommand) action(app *kingpin.Application, element *kingpin.ParseEl
 		return err
 	}
 
-	var token *oauth2.Token
-
 	var authMethod string
 	if *c.method == "" {
 		authMethod = *apiDiscover.Default
@@ -49,42 +43,8 @@ func (c *loginCommand) action(app *kingpin.Application, element *kingpin.ParseEl
 		authMethod = *c.method
 	}
 
-	switch authMethod {
-	case "github":
-		log.Info("Using the Github Auth Driver")
-
-		if apiDiscover.Github == nil {
-			return errors.New("Github auth method is not enabled on this API Server.")
-		}
-
-		if *c.username == "" {
-			return errors.New("Username is required for Github Authentication")
-		}
-
-		password := *c.password
-
-		for password == "" {
-			passwordBytes, err := gopass.GetPasswdPrompt("Please enter your GitHub password: ", true, os.Stdin, os.Stdout)
-			if err != nil {
-				return err
-			}
-			password = string(passwordBytes)
-		}
-
-		token, err = c.Application.APIClient.Auth().GithubLogin(*apiDiscover.Github, *c.username, password, "")
-		if err == auth.ErrOTPRequired {
-			var otpBytes []byte
-			otpBytes, err = gopass.GetPasswdPrompt("Please enter your GitHub OTP Code: ", true, os.Stdin, os.Stdout)
-			if err != nil {
-				return err
-			}
-			otpCode := string(otpBytes)
-			token, err = c.Application.APIClient.Auth().GithubLogin(*apiDiscover.Github, *c.username, password, otpCode)
-		}
-	default:
-		return errors.New(fmt.Sprintf("Unknown API Auth Driver %s", authMethod))
-	}
-
+	log.Infof("Using the %s Auth Method", authMethod)
+	token, err := utils.Login(c.Application.APIClient.Auth(), *c.username, *c.password, authMethod, true)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
 			err = errors.New(apiError.ToRawJSON())
