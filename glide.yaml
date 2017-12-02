@@ -1,0 +1,18 @@
+package: github.com/sandwichcloud/deli-cli
+import:
+- package: github.com/sirupsen/logrus
+  version: ^1.0.3
+- package: golang.org/x/oauth2
+- package: golang.org/x/net
+  subpackages:
+  - context
+- package: github.com/howeyc/gopass
+  version: bf9dde6d0d2c004a008c27aaee91170c786f6db8
+- package: github.com/satori/go.uuid
+  version: ^1.1.0
+- package: github.com/alecthomas/kingpin
+  version: bf710ba16f982acf6eca0084acd9cb933151aa45
+- package: github.com/olekukonko/tablewriter
+  version: 0fd34425a5aee40ff3f260b34e6c3b0d59f58c66
+- package: github.com/fatih/structs
+  version: ^1.0.0
