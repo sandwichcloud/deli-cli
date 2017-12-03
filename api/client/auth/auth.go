@@ -117,6 +117,48 @@ func (authClient *AuthClient) TokenInfo() (*api.TokenInfo, error) {
 	return tokenInfo, nil
 }
 
+func (authClient *AuthClient) BuiltInLogin(options api.BuiltInAuthDriver, username, password string) (*oauth2.Token, error) {
+	ctx, cancel := api.CreateTimeoutContext()
+	defer cancel()
+
+	type requestBody struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	data := requestBody{Username: username, Password: password}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return nil, errors.New("Error parsing Database Auth data into json")
+	}
+
+	resp, err := ctxhttp.Post(ctx, http.DefaultClient, *authClient.APIServer+"/v1/auth/builtin/login", "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		if err == context.DeadlineExceeded {
+			return nil, api.ErrTimedOut
+		}
+		return nil, err
+	}
+
+	responseData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		apiError, err := api.ParseErrors(resp.StatusCode, responseData)
+		if err != nil {
+			return nil, err
+		}
+		return nil, apiError
+	}
+
+	token := &oauth2.Token{}
+	json.Unmarshal(responseData, token)
+	return token, nil
+}
+
 func (authClient *AuthClient) GithubLogin(options api.GithubAuthDriver, username, password, otpCode string) (*oauth2.Token, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()

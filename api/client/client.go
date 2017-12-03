@@ -9,6 +9,7 @@ import (
 
 	"github.com/sandwichcloud/deli-cli/api"
 	"github.com/sandwichcloud/deli-cli/api/client/auth"
+	"github.com/sandwichcloud/deli-cli/api/client/builtin"
 	"github.com/sandwichcloud/deli-cli/api/client/image"
 	"github.com/sandwichcloud/deli-cli/api/client/instance"
 	"github.com/sandwichcloud/deli-cli/api/client/network"
@@ -29,6 +30,7 @@ type SandwichClient struct {
 type ClientInterface interface {
 	createOAuthClient() *http.Client
 	Auth() AuthClientInterface
+	BuiltInAuth() BuiltInAuthClientInterface
 	Project() ProjectClientInterface
 	Region() RegionClientInterface
 	Zone() ZoneClientInterface
@@ -44,8 +46,19 @@ type ClientInterface interface {
 type AuthClientInterface interface {
 	DiscoverAuth() (api.AuthDiscover, error)
 	GithubLogin(options api.GithubAuthDriver, username, password, otpCode string) (*oauth2.Token, error)
+	BuiltInLogin(options api.BuiltInAuthDriver, username, password string) (*oauth2.Token, error)
 	ScopeToken(project *api.Project) (*oauth2.Token, error)
 	TokenInfo() (*api.TokenInfo, error)
+}
+
+type BuiltInAuthClientInterface interface {
+	Create(username, password string) (*api.BuiltInUser, error)
+	Get(id string) (*api.BuiltInUser, error)
+	Delete(id string) error
+	List(limit int, marker string) (*api.BuiltInUserList, error)
+	ChangePassword(id, password string) error
+	AddRole(id, role string) error
+	RemoveRole(id, role string) error
 }
 
 type ProjectClientInterface interface {
@@ -131,6 +144,10 @@ func (client *SandwichClient) Auth() AuthClientInterface {
 	}
 
 	return authClient
+}
+
+func (client *SandwichClient) BuiltInAuth() BuiltInAuthClientInterface {
+	return &builtin.BuiltInAuthClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient()}
 }
 
 func (client *SandwichClient) Project() ProjectClientInterface {

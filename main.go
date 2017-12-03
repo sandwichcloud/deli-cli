@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/sandwichcloud/deli-cli/cmd"
 	"github.com/sandwichcloud/deli-cli/cmd/auth"
+	"github.com/sandwichcloud/deli-cli/cmd/builtin"
 	"github.com/sandwichcloud/deli-cli/cmd/image"
 	"github.com/sandwichcloud/deli-cli/cmd/instance"
 	"github.com/sandwichcloud/deli-cli/cmd/network"
@@ -48,6 +49,9 @@ func main() {
 
 	serviceAccountCommand := serviceAccount.Command{}
 	serviceAccountCommand.Register(app)
+
+	builtinCommand := builtin.Command{}
+	builtinCommand.Register(app)
 
 	app.Run()
 }

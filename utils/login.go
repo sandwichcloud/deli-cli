@@ -45,6 +45,23 @@ func Login(authClient client.AuthClientInterface, username, password, authMethod
 			otpCode := string(otpBytes)
 			token, err = authClient.GithubLogin(*apiDiscover.Github, username, password, otpCode)
 		}
+	case "builtin":
+		if apiDiscover.BuiltIn == nil {
+			return nil, errors.New("BuiltIn auth method is not enabled on this API Server.")
+		}
+
+		if username == "" {
+			return nil, errors.New("Username is required for BuiltIn Authentication")
+		}
+
+		for interactive && password == "" {
+			passwordBytes, err := gopass.GetPasswdPrompt("Please enter your password: ", true, os.Stdin, os.Stdout)
+			if err != nil {
+				return nil, err
+			}
+			password = string(passwordBytes)
+		}
+		token, err = authClient.BuiltInLogin(*apiDiscover.BuiltIn, username, password)
 	default:
 		return nil, errors.New(fmt.Sprintf("Unknown API Auth Driver %s", authMethod))
 	}

@@ -14,12 +14,17 @@ type pageLinks struct {
 }
 
 type AuthDiscover struct {
-	Default *string           `json:"default"`
-	Github  *GithubAuthDriver `json:"github"`
+	Default *string            `json:"default"`
+	Github  *GithubAuthDriver  `json:"github"`
+	BuiltIn *BuiltInAuthDriver `json:"builtin"`
 }
 
 type GithubAuthDriver struct {
 	//Github auth driver has no options
+}
+
+type BuiltInAuthDriver struct {
+	//Database auth driver has no options
 }
 
 type Task struct {
@@ -193,4 +198,17 @@ type ServiceAccount struct {
 type ServiceAccountList struct {
 	Links     []pageLinks      `json:"service-accounts_links"`
 	Instances []ServiceAccount `json:"service-accounts"`
+}
+
+type BuiltInUser struct {
+	ID        uuid.UUID `json:"id"`
+	Username  string    `json:"username"`
+	Roles     []string  `json:"roles"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type BuiltInUserList struct {
+	Links []pageLinks   `json:"users_links"`
+	Users []BuiltInUser `json:"users"`
 }
