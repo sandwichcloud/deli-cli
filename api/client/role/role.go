@@ -43,6 +43,7 @@ func (client *RoleClient) Create(name, roleType, description string) (*api.Role,
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -73,6 +74,7 @@ func (client *RoleClient) Get(id string) (*api.Role, error) {
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -111,6 +113,7 @@ func (client *RoleClient) Delete(id string) error {
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -153,6 +156,7 @@ func (client *RoleClient) List(roleType string, limit int, marker string) (*api.
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)

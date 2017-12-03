@@ -62,6 +62,7 @@ func (zoneClient *ZoneClient) Create(name, regionID, vmCluster, vmDatastore, vmF
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -92,6 +93,7 @@ func (zoneClient *ZoneClient) Get(id string) (*api.Zone, error) {
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -130,6 +132,7 @@ func (zoneClient *ZoneClient) Delete(id string) error {
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -175,6 +178,7 @@ func (zoneClient *ZoneClient) List(regionID string, limit int, marker string) (*
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -217,6 +221,7 @@ func (zoneClient *ZoneClient) ActionSchedule(id string, schedulable bool) error 
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)

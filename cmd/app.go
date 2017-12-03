@@ -142,6 +142,7 @@ func (app *Application) loadCredsMetadata() error {
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)

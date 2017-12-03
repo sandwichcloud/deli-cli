@@ -25,7 +25,7 @@ func (authClient *AuthClient) DiscoverAuth() (api.AuthDiscover, error) {
 	defer cancel()
 	authDiscover := api.AuthDiscover{}
 
-	resp, err := ctxhttp.Get(ctx, http.DefaultClient, *authClient.APIServer+"/v1/auth/discover")
+	response, err := ctxhttp.Get(ctx, http.DefaultClient, *authClient.APIServer+"/v1/auth/discover")
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return authDiscover, api.ErrTimedOut
@@ -33,13 +33,14 @@ func (authClient *AuthClient) DiscoverAuth() (api.AuthDiscover, error) {
 		return authDiscover, err
 	}
 
-	responseData, err := ioutil.ReadAll(resp.Body)
+	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return authDiscover, err
 	}
+	response.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		apiError, err := api.ParseErrors(resp.StatusCode, responseData)
+	if response.StatusCode != http.StatusOK {
+		apiError, err := api.ParseErrors(response.StatusCode, responseData)
 		if err != nil {
 			return authDiscover, err
 		}
@@ -73,6 +74,7 @@ func (authClient *AuthClient) ScopeToken(project *api.Project) (*oauth2.Token, e
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -103,6 +105,7 @@ func (authClient *AuthClient) TokenInfo() (*api.TokenInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -133,7 +136,7 @@ func (authClient *AuthClient) BuiltInLogin(options api.BuiltInAuthDriver, userna
 		return nil, errors.New("Error parsing Database Auth data into json")
 	}
 
-	resp, err := ctxhttp.Post(ctx, http.DefaultClient, *authClient.APIServer+"/v1/auth/builtin/login", "application/json", bytes.NewBuffer(jsonData))
+	response, err := ctxhttp.Post(ctx, http.DefaultClient, *authClient.APIServer+"/v1/auth/builtin/login", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -141,13 +144,14 @@ func (authClient *AuthClient) BuiltInLogin(options api.BuiltInAuthDriver, userna
 		return nil, err
 	}
 
-	responseData, err := ioutil.ReadAll(resp.Body)
+	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		apiError, err := api.ParseErrors(resp.StatusCode, responseData)
+	if response.StatusCode != http.StatusOK {
+		apiError, err := api.ParseErrors(response.StatusCode, responseData)
 		if err != nil {
 			return nil, err
 		}
@@ -180,7 +184,7 @@ func (authClient *AuthClient) GithubLogin(options api.GithubAuthDriver, username
 		return nil, errors.New("Error parsing Github Auth data into json")
 	}
 
-	resp, err := ctxhttp.Post(ctx, http.DefaultClient, *authClient.APIServer+"/v1/auth/github/authorization", "application/json", bytes.NewBuffer(jsonData))
+	response, err := ctxhttp.Post(ctx, http.DefaultClient, *authClient.APIServer+"/v1/auth/github/authorization", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -188,20 +192,21 @@ func (authClient *AuthClient) GithubLogin(options api.GithubAuthDriver, username
 		return nil, err
 	}
 
-	responseData, err := ioutil.ReadAll(resp.Body)
+	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
-	if _, ok := resp.Header["X-Github-Otp"]; ok {
+	if _, ok := response.Header["X-Github-Otp"]; ok {
 		if otpCode != "" {
 			return nil, ErrOTPInvalid
 		}
 		return nil, ErrOTPRequired
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		apiError, err := api.ParseErrors(resp.StatusCode, responseData)
+	if response.StatusCode != http.StatusOK {
+		apiError, err := api.ParseErrors(response.StatusCode, responseData)
 		if err != nil {
 			return nil, err
 		}

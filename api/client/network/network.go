@@ -62,6 +62,7 @@ func (client *NetworkClient) Create(name, regionID, portGroup, cidr string, gate
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -92,6 +93,7 @@ func (client *NetworkClient) Get(id string) (*api.Network, error) {
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -130,6 +132,7 @@ func (client *NetworkClient) Delete(id string) error {
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -171,6 +174,7 @@ func (client *NetworkClient) List(limit int, marker string) (*api.NetworkList, e
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)

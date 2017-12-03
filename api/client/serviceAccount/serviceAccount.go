@@ -42,6 +42,7 @@ func (client *ServiceAccountClient) Create(name, roleId string) (*api.ServiceAcc
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -72,6 +73,7 @@ func (client *ServiceAccountClient) Get(id string) (*api.ServiceAccount, error) 
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -110,6 +112,7 @@ func (client *ServiceAccountClient) Delete(id string) error {
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -151,6 +154,7 @@ func (client *ServiceAccountClient) List(limit int, marker string) (*api.Service
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)

@@ -33,6 +33,7 @@ func (client *PolicyClient) Get(id string) (*api.Policy, error) {
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -76,6 +77,7 @@ func (client *PolicyClient) List(limit int, marker string) (*api.PolicyList, err
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)

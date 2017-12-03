@@ -42,6 +42,7 @@ func (client *BuiltInAuthClient) Create(username, password string) (*api.BuiltIn
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -72,6 +73,7 @@ func (client *BuiltInAuthClient) Get(id string) (*api.BuiltInUser, error) {
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -110,6 +112,7 @@ func (client *BuiltInAuthClient) Delete(id string) error {
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -151,6 +154,7 @@ func (client *BuiltInAuthClient) List(limit int, marker string) (*api.BuiltInUse
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -203,6 +207,7 @@ func (client *BuiltInAuthClient) ChangePassword(id, password string) error {
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -247,6 +252,7 @@ func (client *BuiltInAuthClient) AddRole(id, role string) error {
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -291,6 +297,7 @@ func (client *BuiltInAuthClient) RemoveRole(id, role string) error {
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)

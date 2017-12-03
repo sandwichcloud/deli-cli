@@ -53,6 +53,7 @@ func (regionClient *RegionClient) Create(name, datacenter, imageDatastore, image
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -83,6 +84,7 @@ func (regionClient *RegionClient) Get(id string) (*api.Region, error) {
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -121,6 +123,7 @@ func (regionClient *RegionClient) Delete(id string) error {
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -162,6 +165,7 @@ func (regionClient *RegionClient) List(limit int, marker string) (*api.RegionLis
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -204,6 +208,7 @@ func (regionClient *RegionClient) ActionSchedule(id string, schedulable bool) er
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)

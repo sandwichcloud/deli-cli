@@ -50,6 +50,7 @@ func (client *InstanceClient) Create(name, imageID, networkID string, publicKeys
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -80,6 +81,7 @@ func (client *InstanceClient) Get(id string) (*api.Instance, error) {
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -118,6 +120,7 @@ func (client *InstanceClient) Delete(id string) error {
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusAccepted {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -163,6 +166,7 @@ func (client *InstanceClient) List(imageID string, limit int, marker string) (*a
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -206,6 +210,7 @@ func (client *InstanceClient) ActionStop(id string, hard bool, timeout int) erro
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusAccepted {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -237,6 +242,7 @@ func (client *InstanceClient) ActionStart(id string) error {
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusAccepted {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -277,6 +283,7 @@ func (client *InstanceClient) ActionRestart(id string, hard bool, timeout int) e
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusAccepted {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -312,6 +319,7 @@ func (client *InstanceClient) ActionImage(id string, name string, visibility str
 	if err != nil {
 		return nil, err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
@@ -354,6 +362,7 @@ func (client *InstanceClient) ActionResetState(id string, active bool) error {
 	if err != nil {
 		return err
 	}
+	response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
