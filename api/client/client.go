@@ -74,7 +74,7 @@ type RegionClientInterface interface {
 	Create(name, datacenter, imageDatastore, imageFolder string) (*api.Region, error)
 	Get(id string) (*api.Region, error)
 	Delete(id string) error
-	List(limit int, marker string) (*api.RegionList, error)
+	List(name string, limit int, marker string) (*api.RegionList, error)
 	ActionSchedule(id string, schedulable bool) error
 }
 
@@ -103,7 +103,7 @@ type KeypairClientInterface interface {
 }
 
 type InstanceClientInterface interface {
-	Create(name, imageID, networkID string, keypairIDs []string, tags map[string]string) (*api.Instance, error)
+	Create(name, imageID, regionID, zoneID, networkID string, keypairIDs []string, tags map[string]string) (*api.Instance, error)
 	Get(id string) (*api.Instance, error)
 	Delete(id string) error
 	List(imageID string, limit int, marker string) (*api.InstanceList, error)
@@ -118,7 +118,7 @@ type NetworkClientInterface interface {
 	Create(name, regionID, portGroup, cidr string, gateway, poolStart, poolEnd net.IP, dnsServers []net.IP) (*api.Network, error)
 	Get(id string) (*api.Network, error)
 	Delete(id string) error
-	List(limit int, marker string) (*api.NetworkList, error)
+	List(name, region_id string, limit int, marker string) (*api.NetworkList, error)
 }
 
 type PolicyClientInterface interface {

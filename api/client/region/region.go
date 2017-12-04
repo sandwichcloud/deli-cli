@@ -136,10 +136,14 @@ func (regionClient *RegionClient) Delete(id string) error {
 	return nil
 }
 
-func (regionClient *RegionClient) List(limit int, marker string) (*api.RegionList, error) {
+func (regionClient *RegionClient) List(name string, limit int, marker string) (*api.RegionList, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 	parameters := url.Values{}
+
+	if len(name) > 0 {
+		parameters.Add("name", name)
+	}
 
 	parameters.Add("limit", strconv.FormatInt(int64(limit), 10))
 

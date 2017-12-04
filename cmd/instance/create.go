@@ -20,6 +20,8 @@ type createCommand struct {
 	cmd.Command
 	raw        *bool
 	name       *string
+	regionID   *string
+	zoneID     *string
 	imageID    *string
 	networkID  *string
 	keypairIDs *[]string
@@ -29,6 +31,8 @@ type createCommand struct {
 func (c *createCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("create", "Create an image").Action(c.action)
 	c.name = command.Arg("name", "The image name").Required().String()
+	c.regionID = command.Flag("regionID", "The region to launch the instance in").Required().String()
+	c.zoneID = command.Flag("zoneID", "The zone to launch the instance in").Default("").String()
 	c.imageID = command.Flag("imageID", "The image to launch the instance from").Required().String()
 	c.networkID = command.Flag("networkID", "The network to attach the instance to").Required().String()
 	c.keypairIDs = command.Flag("keypairID", "An ID of a keypair to add to the instance").Strings()
@@ -57,7 +61,7 @@ func (c *createCommand) action(app *kingpin.Application, element *kingpin.ParseE
 		}
 	}
 
-	instance, err := c.Application.APIClient.Instance().Create(*c.name, *c.imageID, *c.networkID, *c.keypairIDs, tags)
+	instance, err := c.Application.APIClient.Instance().Create(*c.name, *c.imageID, *c.regionID, *c.zoneID, *c.networkID, *c.keypairIDs, tags)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())

@@ -23,19 +23,29 @@ type InstanceClient struct {
 	HttpClient *http.Client
 }
 
-func (client *InstanceClient) Create(name, imageID, networkID string, keypairIDs []string, tags map[string]string) (*api.Instance, error) {
+func (client *InstanceClient) Create(name, imageID, regionID, zoneID, networkID string, keypairIDs []string, tags map[string]string) (*api.Instance, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
 	type createBody struct {
 		Name       string            `json:"name"`
 		ImageID    string            `json:"image_id"`
+		RegionID   string            `json:"region_id"`
+		ZoneID     string            `json:"zone_id,omitempty"`
 		NetworkID  string            `json:"network_id"`
 		KeypairIDs []string          `json:"keypair_ids,omitempty"`
 		Tags       map[string]string `json:"tags"`
 	}
 
-	body := createBody{Name: name, ImageID: imageID, NetworkID: networkID, KeypairIDs: keypairIDs, Tags: tags}
+	body := createBody{
+		Name:       name,
+		ImageID:    imageID,
+		RegionID:   regionID,
+		ZoneID:     zoneID,
+		NetworkID:  networkID,
+		KeypairIDs: keypairIDs,
+		Tags:       tags,
+	}
 	jsonBody, _ := json.Marshal(body)
 
 	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/v1/instances", "application/json", bytes.NewBuffer(jsonBody))

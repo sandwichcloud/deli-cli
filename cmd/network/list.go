@@ -19,12 +19,16 @@ import (
 
 type listCommand struct {
 	cmd.Command
-	limit  *int
-	marker *string
+	name     *string
+	regionID *string
+	limit    *int
+	marker   *string
 }
 
 func (c *listCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("list", "List projects").Action(c.action)
+	c.name = command.Flag("name", "The name to filter by").Default("").String()
+	c.regionID = command.Flag("regionID", "The region to filter by").Default("").String()
 	c.limit = command.Flag("limit", "Number of projects to show per page").Default("20").Int()
 	c.marker = command.Flag("marker", "Marker Token for the next page of results").String()
 }
@@ -38,7 +42,7 @@ func (c *listCommand) action(app *kingpin.Application, element *kingpin.ParseEle
 	if err != nil {
 		return err
 	}
-	networks, err := c.Application.APIClient.Network().List(*c.limit, *c.marker)
+	networks, err := c.Application.APIClient.Network().List(*c.name, *c.regionID, *c.limit, *c.marker)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
 			err = errors.New(apiError.ToRawJSON())

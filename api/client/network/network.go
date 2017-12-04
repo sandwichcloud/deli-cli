@@ -145,10 +145,18 @@ func (client *NetworkClient) Delete(id string) error {
 	return nil
 }
 
-func (client *NetworkClient) List(limit int, marker string) (*api.NetworkList, error) {
+func (client *NetworkClient) List(name, region_id string, limit int, marker string) (*api.NetworkList, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 	parameters := url.Values{}
+
+	if len(name) > 0 {
+		parameters.Add("name", name)
+	}
+
+	if len(region_id) > 0 {
+		parameters.Add("region_id", region_id)
+	}
 
 	parameters.Add("limit", strconv.FormatInt(int64(limit), 10))
 
