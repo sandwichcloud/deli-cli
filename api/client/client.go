@@ -12,6 +12,7 @@ import (
 	"github.com/sandwichcloud/deli-cli/api/client/builtin"
 	"github.com/sandwichcloud/deli-cli/api/client/image"
 	"github.com/sandwichcloud/deli-cli/api/client/instance"
+	"github.com/sandwichcloud/deli-cli/api/client/keypair"
 	"github.com/sandwichcloud/deli-cli/api/client/network"
 	"github.com/sandwichcloud/deli-cli/api/client/policy"
 	"github.com/sandwichcloud/deli-cli/api/client/project"
@@ -36,6 +37,7 @@ type ClientInterface interface {
 	Zone() ZoneClientInterface
 	Image() ImageClientInterface
 	Network() NetworkClientInterface
+	Keypair() KeypairClientInterface
 	Instance() InstanceClientInterface
 	Policy() PolicyClientInterface
 	Role() RoleClientInterface
@@ -93,8 +95,15 @@ type ImageClientInterface interface {
 	ActionUnlock(id string) error
 }
 
+type KeypairClientInterface interface {
+	Create(name, publicKey string) (*api.Keypair, error)
+	Get(id string) (*api.Keypair, error)
+	Delete(id string) error
+	List(limit int, marker string) (*api.KeypairList, error)
+}
+
 type InstanceClientInterface interface {
-	Create(name, imageID, networkID string, publicKeys []string, tags map[string]string) (*api.Instance, error)
+	Create(name, imageID, networkID string, keypairIDs []string, tags map[string]string) (*api.Instance, error)
 	Get(id string) (*api.Instance, error)
 	Delete(id string) error
 	List(imageID string, limit int, marker string) (*api.InstanceList, error)
@@ -168,6 +177,10 @@ func (client *SandwichClient) Image() ImageClientInterface {
 
 func (client *SandwichClient) Network() NetworkClientInterface {
 	return &network.NetworkClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient()}
+}
+
+func (client *SandwichClient) Keypair() KeypairClientInterface {
+	return &keypair.KeypairClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient()}
 }
 
 func (client *SandwichClient) Instance() InstanceClientInterface {

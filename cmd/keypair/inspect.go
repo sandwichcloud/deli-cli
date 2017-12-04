@@ -1,10 +1,9 @@
-package instance
+package keypair
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"reflect"
 
 	"os"
 
@@ -18,13 +17,13 @@ import (
 
 type inspectCommand struct {
 	cmd.Command
-	raw        *bool
-	instanceID *string
+	raw       *bool
+	keypairID *string
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
-	command := cmd.Command("inspect", "Inspect an instance").Action(c.action)
-	c.instanceID = command.Arg("instance ID", "The instance ID").String()
+	command := cmd.Command("inspect", "Inspect a keypair").Action(c.action)
+	c.keypairID = command.Arg("keypair ID", "The keypair ID").String()
 }
 
 func (c *inspectCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -36,7 +35,7 @@ func (c *inspectCommand) action(app *kingpin.Application, element *kingpin.Parse
 	if err != nil {
 		return err
 	}
-	instance, err := c.Application.APIClient.Instance().Get(*c.instanceID)
+	keypair, err := c.Application.APIClient.Keypair().Get(*c.keypairID)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -44,20 +43,17 @@ func (c *inspectCommand) action(app *kingpin.Application, element *kingpin.Parse
 		return err
 	} else {
 		if *c.raw {
-			instanceBytes, _ := json.MarshalIndent(instance, "", "  ")
-			fmt.Println(string(instanceBytes))
+			keypairBytes, _ := json.MarshalIndent(keypair, "", "  ")
+			fmt.Println(string(keypairBytes))
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Property", "Value"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
 			table.SetAutoMergeCells(true)
 
-			for _, field := range structs.Fields(instance) {
-				if field.Kind() == reflect.Slice {
-					v := reflect.ValueOf(field.Value())
-					for i := 0; i < v.Len(); i++ {
-						table.Append([]string{field.Tag("json"), utils.InterfaceToString(v.Index(i))})
-					}
+			for _, field := range structs.Fields(keypair) {
+				if field.Tag("json") == "public_key" {
+					table.Append([]string{field.Tag("json"), field.Value().(string)[:33] + "..."})
 				} else {
 					table.Append([]string{field.Tag("json"), utils.InterfaceToString(field.Value())})
 				}

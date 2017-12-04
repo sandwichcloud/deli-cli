@@ -140,6 +140,17 @@ type NetworkList struct {
 	Networks []Network   `json:"networks"`
 }
 
+type Keypair struct {
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	PublicKey string    `json:"public_key"`
+}
+
+type KeypairList struct {
+	Links    []pageLinks `json:"keypairs_links"`
+	KeyPairs []Keypair   `json:"keypairs"`
+}
+
 type Instance struct {
 	ID            uuid.UUID         `json:"id"`
 	Name          string            `json:"name"`
@@ -147,9 +158,10 @@ type Instance struct {
 	NetworkPortID uuid.UUID         `json:"network_port_id"`
 	RegionID      uuid.UUID         `json:"region_id"`
 	ZoneID        string            `json:"zone_id"`
+	Tags          map[string]string `json:"tags"`
+	KeypairIDs    []uuid.UUID       `json:"keypair_ids"`
 	State         string            `json:"state"`
 	CurrentTaskID uuid.UUID         `json:"current_task_id"`
-	Tags          map[string]string `json:"tags"`
 	CreatedAt     time.Time         `json:"created_at"`
 	UpdatedAt     time.Time         `json:"updated_at"`
 }

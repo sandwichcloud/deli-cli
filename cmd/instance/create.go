@@ -22,7 +22,7 @@ type createCommand struct {
 	name       *string
 	imageID    *string
 	networkID  *string
-	publicKeys *[]string
+	keypairIDs *[]string
 	tags       *map[string]string
 }
 
@@ -31,7 +31,7 @@ func (c *createCommand) Register(cmd *kingpin.CmdClause) {
 	c.name = command.Arg("name", "The image name").Required().String()
 	c.imageID = command.Flag("imageID", "The image to launch the instance from").Required().String()
 	c.networkID = command.Flag("networkID", "The network to attach the instance to").Required().String()
-	c.publicKeys = command.Flag("publicKey", "A public key to add to the instance").Strings()
+	c.keypairIDs = command.Flag("keypairID", "An ID of a keypair to add to the instance").Strings()
 	c.tags = command.Flag("tag", "A metadata tag to add to the instance").StringMap()
 }
 
@@ -57,7 +57,7 @@ func (c *createCommand) action(app *kingpin.Application, element *kingpin.ParseE
 		}
 	}
 
-	instance, err := c.Application.APIClient.Instance().Create(*c.name, *c.imageID, *c.networkID, *c.publicKeys, tags)
+	instance, err := c.Application.APIClient.Instance().Create(*c.name, *c.imageID, *c.networkID, *c.keypairIDs, tags)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
