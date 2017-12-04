@@ -37,6 +37,7 @@ type ClientInterface interface {
 	Zone() ZoneClientInterface
 	Image() ImageClientInterface
 	Network() NetworkClientInterface
+	NetworkPort() NetworkPortClientInterface
 	Keypair() KeypairClientInterface
 	Instance() InstanceClientInterface
 	Policy() PolicyClientInterface
@@ -102,8 +103,14 @@ type KeypairClientInterface interface {
 	List(limit int, marker string) (*api.KeypairList, error)
 }
 
+type NetworkPortClientInterface interface {
+	Get(id string) (*api.NetworkPort, error)
+	List(limit int, marker string) (*api.NetworkPortList, error)
+	Delete(id string) error
+}
+
 type InstanceClientInterface interface {
-	Create(name, imageID, regionID, zoneID, networkID string, keypairIDs []string, tags map[string]string) (*api.Instance, error)
+	Create(name, imageID, regionID, zoneID, networkID, serviceAccountID string, keypairIDs []string, tags map[string]string) (*api.Instance, error)
 	Get(id string) (*api.Instance, error)
 	Delete(id string) error
 	List(imageID string, limit int, marker string) (*api.InstanceList, error)
@@ -177,6 +184,10 @@ func (client *SandwichClient) Image() ImageClientInterface {
 
 func (client *SandwichClient) Network() NetworkClientInterface {
 	return &network.NetworkClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient()}
+}
+
+func (client *SandwichClient) NetworkPort() NetworkPortClientInterface {
+	return &network.NetworkPortClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient()}
 }
 
 func (client *SandwichClient) Keypair() KeypairClientInterface {

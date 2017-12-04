@@ -151,19 +151,31 @@ type KeypairList struct {
 	KeyPairs []Keypair   `json:"keypairs"`
 }
 
+type NetworkPort struct {
+	ID        uuid.UUID `json:"id"`
+	NetworkID string    `json:"network_id"`
+	IPAddress net.IP    `json:"ip_address"`
+}
+
+type NetworkPortList struct {
+	Links        []pageLinks   `json:"network-ports_links"`
+	NetworkPorts []NetworkPort `json:"network-ports"`
+}
+
 type Instance struct {
-	ID            uuid.UUID         `json:"id"`
-	Name          string            `json:"name"`
-	ImageID       uuid.UUID         `json:"image_id"`
-	NetworkPortID uuid.UUID         `json:"network_port_id"`
-	RegionID      uuid.UUID         `json:"region_id"`
-	ZoneID        string            `json:"zone_id"`
-	Tags          map[string]string `json:"tags"`
-	KeypairIDs    []uuid.UUID       `json:"keypair_ids"`
-	State         string            `json:"state"`
-	CurrentTaskID uuid.UUID         `json:"current_task_id"`
-	CreatedAt     time.Time         `json:"created_at"`
-	UpdatedAt     time.Time         `json:"updated_at"`
+	ID               uuid.UUID         `json:"id"`
+	Name             string            `json:"name"`
+	ImageID          uuid.UUID         `json:"image_id"`
+	NetworkPortID    uuid.UUID         `json:"network_port_id"`
+	RegionID         uuid.UUID         `json:"region_id"`
+	ZoneID           uuid.UUID         `json:"zone_id"`
+	ServiceAccountID string            `json:"service_account_id"`
+	Tags             map[string]string `json:"tags"`
+	KeypairIDs       []uuid.UUID       `json:"keypair_ids"`
+	State            string            `json:"state"`
+	CurrentTaskID    uuid.UUID         `json:"current_task_id"`
+	CreatedAt        time.Time         `json:"created_at"`
+	UpdatedAt        time.Time         `json:"updated_at"`
 }
 
 type InstanceList struct {
@@ -208,8 +220,8 @@ type ServiceAccount struct {
 }
 
 type ServiceAccountList struct {
-	Links     []pageLinks      `json:"service-accounts_links"`
-	Instances []ServiceAccount `json:"service-accounts"`
+	Links           []pageLinks      `json:"service-accounts_links"`
+	ServiceAccounts []ServiceAccount `json:"service-accounts"`
 }
 
 type BuiltInUser struct {

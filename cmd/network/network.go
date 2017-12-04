@@ -1,6 +1,9 @@
 package network
 
-import "github.com/sandwichcloud/deli-cli/cmd"
+import (
+	"github.com/sandwichcloud/deli-cli/cmd"
+	"github.com/sandwichcloud/deli-cli/cmd/network/port"
+)
 
 type Command struct {
 	cmd.Command
@@ -28,4 +31,8 @@ func (c *Command) Register(app *cmd.Application) {
 	deleteCommand := deleteCommand{}
 	deleteCommand.Application = c.Application
 	deleteCommand.Register(command)
+
+	portCommand := port.Command{Raw: raw}
+	portCommand.Application = c.Application
+	portCommand.Register(command)
 }

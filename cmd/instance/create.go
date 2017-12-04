@@ -18,14 +18,15 @@ import (
 
 type createCommand struct {
 	cmd.Command
-	raw        *bool
-	name       *string
-	regionID   *string
-	zoneID     *string
-	imageID    *string
-	networkID  *string
-	keypairIDs *[]string
-	tags       *map[string]string
+	raw              *bool
+	name             *string
+	regionID         *string
+	zoneID           *string
+	imageID          *string
+	serviceAccountID *string
+	networkID        *string
+	keypairIDs       *[]string
+	tags             *map[string]string
 }
 
 func (c *createCommand) Register(cmd *kingpin.CmdClause) {
@@ -34,6 +35,7 @@ func (c *createCommand) Register(cmd *kingpin.CmdClause) {
 	c.regionID = command.Flag("regionID", "The region to launch the instance in").Required().String()
 	c.zoneID = command.Flag("zoneID", "The zone to launch the instance in").Default("").String()
 	c.imageID = command.Flag("imageID", "The image to launch the instance from").Required().String()
+	c.serviceAccountID = command.Flag("serviceAccountID", "The service account to attach to the instance").Default("").String()
 	c.networkID = command.Flag("networkID", "The network to attach the instance to").Required().String()
 	c.keypairIDs = command.Flag("keypairID", "An ID of a keypair to add to the instance").Strings()
 	c.tags = command.Flag("tag", "A metadata tag to add to the instance").StringMap()
@@ -61,7 +63,7 @@ func (c *createCommand) action(app *kingpin.Application, element *kingpin.ParseE
 		}
 	}
 
-	instance, err := c.Application.APIClient.Instance().Create(*c.name, *c.imageID, *c.regionID, *c.zoneID, *c.networkID, *c.keypairIDs, tags)
+	instance, err := c.Application.APIClient.Instance().Create(*c.name, *c.imageID, *c.regionID, *c.zoneID, *c.networkID, "", *c.keypairIDs, tags)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())

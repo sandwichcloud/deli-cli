@@ -58,6 +58,11 @@ func (c *inspectCommand) action(app *kingpin.Application, element *kingpin.Parse
 					for i := 0; i < v.Len(); i++ {
 						table.Append([]string{field.Tag("json"), utils.InterfaceToString(v.Index(i))})
 					}
+				} else if field.Kind() == reflect.Map {
+					v := reflect.ValueOf(field.Value())
+					for _, k := range v.MapKeys() {
+						table.Append([]string{field.Tag("json"), utils.InterfaceToString(k) + "=" + utils.InterfaceToString(v.MapIndex(k))})
+					}
 				} else {
 					table.Append([]string{field.Tag("json"), utils.InterfaceToString(field.Value())})
 				}

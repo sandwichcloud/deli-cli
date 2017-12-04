@@ -1,4 +1,4 @@
-package keypair
+package port
 
 import (
 	"encoding/json"
@@ -17,13 +17,13 @@ import (
 
 type inspectCommand struct {
 	cmd.Command
-	raw       *bool
-	keypairID *string
+	raw    *bool
+	portID *string
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
-	command := cmd.Command("inspect", "Inspect a keypair").Action(c.action)
-	c.keypairID = command.Arg("keypair ID", "The keypair ID").Required().String()
+	command := cmd.Command("inspect", "Inspect a network port").Action(c.action)
+	c.portID = command.Arg("network port ID", "The network port ID").Required().String()
 }
 
 func (c *inspectCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -35,7 +35,7 @@ func (c *inspectCommand) action(app *kingpin.Application, element *kingpin.Parse
 	if err != nil {
 		return err
 	}
-	keypair, err := c.Application.APIClient.Keypair().Get(*c.keypairID)
+	keypair, err := c.Application.APIClient.NetworkPort().Get(*c.portID)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())

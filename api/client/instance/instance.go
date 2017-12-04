@@ -23,28 +23,30 @@ type InstanceClient struct {
 	HttpClient *http.Client
 }
 
-func (client *InstanceClient) Create(name, imageID, regionID, zoneID, networkID string, keypairIDs []string, tags map[string]string) (*api.Instance, error) {
+func (client *InstanceClient) Create(name, imageID, regionID, zoneID, networkID, serviceAccountID string, keypairIDs []string, tags map[string]string) (*api.Instance, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
 	type createBody struct {
-		Name       string            `json:"name"`
-		ImageID    string            `json:"image_id"`
-		RegionID   string            `json:"region_id"`
-		ZoneID     string            `json:"zone_id,omitempty"`
-		NetworkID  string            `json:"network_id"`
-		KeypairIDs []string          `json:"keypair_ids,omitempty"`
-		Tags       map[string]string `json:"tags"`
+		Name             string            `json:"name"`
+		ImageID          string            `json:"image_id"`
+		RegionID         string            `json:"region_id"`
+		ZoneID           string            `json:"zone_id,omitempty"`
+		ServiceAccountID string            `json:"service_account_id,omitempty"`
+		NetworkID        string            `json:"network_id"`
+		KeypairIDs       []string          `json:"keypair_ids,omitempty"`
+		Tags             map[string]string `json:"tags"`
 	}
 
 	body := createBody{
-		Name:       name,
-		ImageID:    imageID,
-		RegionID:   regionID,
-		ZoneID:     zoneID,
-		NetworkID:  networkID,
-		KeypairIDs: keypairIDs,
-		Tags:       tags,
+		Name:             name,
+		ImageID:          imageID,
+		RegionID:         regionID,
+		ZoneID:           zoneID,
+		NetworkID:        networkID,
+		ServiceAccountID: serviceAccountID,
+		KeypairIDs:       keypairIDs,
+		Tags:             tags,
 	}
 	jsonBody, _ := json.Marshal(body)
 
