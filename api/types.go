@@ -141,9 +141,9 @@ type NetworkList struct {
 }
 
 type Keypair struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	PublicKey string    `json:"public_key"`
+	ID        uuid.UUID `json:"id" structs:"id"`
+	Name      string    `json:"name" structs:"name"`
+	PublicKey string    `json:"public_key" structs:"public_key"`
 }
 
 type KeypairList struct {
@@ -153,7 +153,7 @@ type KeypairList struct {
 
 type NetworkPort struct {
 	ID        uuid.UUID `json:"id"`
-	NetworkID string    `json:"network_id"`
+	NetworkID uuid.UUID `json:"network_id"`
 	IPAddress net.IP    `json:"ip_address"`
 }
 
@@ -169,7 +169,7 @@ type Instance struct {
 	NetworkPortID    uuid.UUID         `json:"network_port_id"`
 	RegionID         uuid.UUID         `json:"region_id"`
 	ZoneID           uuid.UUID         `json:"zone_id"`
-	ServiceAccountID string            `json:"service_account_id"`
+	ServiceAccountID uuid.UUID         `json:"service_account_id"`
 	Tags             map[string]string `json:"tags"`
 	KeypairIDs       []uuid.UUID       `json:"keypair_ids"`
 	State            string            `json:"state"`
