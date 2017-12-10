@@ -134,7 +134,7 @@ func (client *InstanceClient) Delete(id string) error {
 	}
 	response.Body.Close()
 
-	if response.StatusCode != http.StatusAccepted {
+	if response.StatusCode != http.StatusNoContent {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
 		if err != nil {
 			return err
