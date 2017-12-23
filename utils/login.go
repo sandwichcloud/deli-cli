@@ -45,13 +45,13 @@ func Login(authClient client.AuthClientInterface, username, password, authMethod
 			otpCode := string(otpBytes)
 			token, err = authClient.GithubLogin(*apiDiscover.Github, username, password, otpCode)
 		}
-	case "builtin":
-		if apiDiscover.BuiltIn == nil {
-			return nil, errors.New("BuiltIn auth method is not enabled on this API Server.")
+	case "database":
+		if apiDiscover.Database == nil {
+			return nil, errors.New("Database auth method is not enabled on this API Server.")
 		}
 
 		if username == "" {
-			return nil, errors.New("Username is required for BuiltIn Authentication")
+			return nil, errors.New("Username is required for Database Authentication")
 		}
 
 		for interactive && password == "" {
@@ -61,7 +61,7 @@ func Login(authClient client.AuthClientInterface, username, password, authMethod
 			}
 			password = string(passwordBytes)
 		}
-		token, err = authClient.BuiltInLogin(*apiDiscover.BuiltIn, username, password)
+		token, err = authClient.DatabaseLogin(*apiDiscover.Database, username, password)
 	default:
 		return nil, errors.New(fmt.Sprintf("Unknown API Auth Driver %s", authMethod))
 	}

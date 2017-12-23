@@ -31,8 +31,8 @@ func (c *createCommand) Register(cmd *kingpin.CmdClause) {
 	c.vmCluster = command.Flag("vm-cluster", "The VMware cluster for this zone").Required().String()
 	c.vmDatastore = command.Flag("vm-datastore", "The VMWare datastore for this cluster").Required().String()
 	c.vmFolder = command.Flag("vm-folder", "The VMWare VM & Templates folder to keep vms in").String()
-	c.coreProvisionPercent = command.Flag("core-provision-percent", "The percentage of cores to provision from the VMWare cluster").Default("100").Int()
-	c.ramProvisionPercent = command.Flag("ram-provision-percent", "The percentage of ram to provision from the VMWare cluster").Default("100").Int()
+	c.coreProvisionPercent = command.Flag("core-provision-percent", "The percentage of cores to provision from the VMWare cluster").Default("1600").Int()
+	c.ramProvisionPercent = command.Flag("ram-provision-percent", "The percentage of ram to provision from the VMWare cluster").Default("150").Int()
 
 }
 

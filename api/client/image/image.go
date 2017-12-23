@@ -25,13 +25,13 @@ func (client *ImageClient) Create(name, regionID, fileName, visibility string) (
 	defer cancel()
 
 	type createBody struct {
-		Name       string `json:"name"`
-		RegionID   string `json:"region_id"`
-		FileName   string `json:"file_name"`
-		Visibility string `json:"visibility"`
+		Name     string `json:"name"`
+		RegionID string `json:"region_id"`
+		FileName string `json:"file_name"`
+		//Visibility string `json:"visibility"`
 	}
 
-	body := createBody{Name: name, RegionID: regionID, FileName: fileName, Visibility: visibility}
+	body := createBody{Name: name, RegionID: regionID, FileName: fileName /*Visibility: visibility*/}
 	jsonBody, _ := json.Marshal(body)
 
 	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/v1/images", "application/json", bytes.NewBuffer(jsonBody))

@@ -14,36 +14,23 @@ type pageLinks struct {
 }
 
 type AuthDiscover struct {
-	Default *string            `json:"default"`
-	Github  *GithubAuthDriver  `json:"github"`
-	BuiltIn *BuiltInAuthDriver `json:"builtin"`
+	Default  *string             `json:"default"`
+	Github   *GithubAuthDriver   `json:"github"`
+	Database *DatabaseAuthDriver `json:"database"`
 }
 
 type GithubAuthDriver struct {
 	//Github auth driver has no options
 }
 
-type BuiltInAuthDriver struct {
+type DatabaseAuthDriver struct {
 	//Database auth driver has no options
 }
 
-type Task struct {
-	ID           uuid.UUID `json:"id"`
-	Name         string    `json:"name"`
-	State        string    `json:"state"`
-	ErrorMessage string    `json:"error_message"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-	StoppedAt    time.Time `json:"stopped_at"`
-}
-
 type Project struct {
-	ID            uuid.UUID `json:"id"`
-	Name          string    `json:"name"`
-	State         string    `json:"state"`
-	CurrentTaskID uuid.UUID `json:"current_task_id"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type ProjectList struct {
@@ -59,9 +46,8 @@ type Region struct {
 	ImageFolder    string    `json:"image_folder"`
 	Schedulable    bool      `json:"schedulable"`
 	State          string    `json:"state"`
-	CurrentTaskID  uuid.UUID `json:"current_task_id"`
+	ErrorMessage   string    `json:"error_message"`
 	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 type RegionList struct {
@@ -80,9 +66,8 @@ type Zone struct {
 	RamProvisionPercent  int       `json:"ram_provision_percent"`
 	Schedulable          bool      `json:"schedulable"`
 	State                string    `json:"state"`
-	CurrentTaskID        uuid.UUID `json:"current_task_id"`
+	ErrorMessage         string    `json:"error_message"`
 	CreatedAt            time.Time `json:"created_at"`
-	UpdatedAt            time.Time `json:"updated_at"`
 }
 
 type ZoneList struct {
@@ -91,16 +76,15 @@ type ZoneList struct {
 }
 
 type Image struct {
-	ID            uuid.UUID `json:"id"`
-	Name          string    `json:"name"`
-	FileName      string    `json:"file_name"`
-	Visibility    string    `json:"visibility"`
-	Locked        bool      `json:"locked"`
-	RegionID      uuid.UUID `json:"region_id"`
-	State         string    `json:"state"`
-	CurrentTaskID uuid.UUID `json:"current_task_id"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	FileName     string    `json:"file_name"`
+	Visibility   string    `json:"visibility"`
+	Locked       bool      `json:"locked"`
+	RegionID     uuid.UUID `json:"region_id"`
+	State        string    `json:"state"`
+	ErrorMessage string    `json:"error_message"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 type ImageList struct {
@@ -120,19 +104,18 @@ type TokenInfo struct {
 }
 
 type Network struct {
-	ID            uuid.UUID `json:"id"`
-	Name          string    `json:"name"`
-	PortGroup     string    `json:"port_group"`
-	Cidr          string    `json:"cidr"`
-	Gateway       net.IP    `json:"gateway"`
-	DNSServers    []net.IP  `json:"dns_servers"`
-	PoolStart     net.IP    `json:"pool_start"`
-	PoolEnd       net.IP    `json:"pool_end"`
-	RegionID      uuid.UUID `json:"region_id"`
-	State         string    `json:"state"`
-	CurrentTaskID uuid.UUID `json:"current_task_id"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	PortGroup    string    `json:"port_group"`
+	Cidr         string    `json:"cidr"`
+	Gateway      net.IP    `json:"gateway"`
+	DNSServers   []net.IP  `json:"dns_servers"`
+	PoolStart    net.IP    `json:"pool_start"`
+	PoolEnd      net.IP    `json:"pool_end"`
+	RegionID     uuid.UUID `json:"region_id"`
+	State        string    `json:"state"`
+	ErrorMessage string    `json:"error_message"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 type NetworkList struct {
@@ -173,9 +156,8 @@ type Instance struct {
 	Tags             map[string]string `json:"tags"`
 	KeypairIDs       []uuid.UUID       `json:"keypair_ids"`
 	State            string            `json:"state"`
-	CurrentTaskID    uuid.UUID         `json:"current_task_id"`
+	ErrorMessage     string            `json:"error_message"`
 	CreatedAt        time.Time         `json:"created_at"`
-	UpdatedAt        time.Time         `json:"updated_at"`
 }
 
 type InstanceList struct {
@@ -188,7 +170,6 @@ type Policy struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type PolicyList struct {
@@ -202,7 +183,6 @@ type Role struct {
 	Description string    `json:"description"`
 	ProjectID   string    `json:"project_id"`
 	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type RoleList struct {
@@ -216,7 +196,6 @@ type ServiceAccount struct {
 	RoleID    string    `json:"role_id"`
 	ProjectID string    `json:"project_id"`
 	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type ServiceAccountList struct {
@@ -229,7 +208,6 @@ type BuiltInUser struct {
 	Username  string    `json:"username"`
 	Roles     []string  `json:"roles"`
 	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type BuiltInUserList struct {

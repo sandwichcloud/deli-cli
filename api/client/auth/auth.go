@@ -120,7 +120,7 @@ func (authClient *AuthClient) TokenInfo() (*api.TokenInfo, error) {
 	return tokenInfo, nil
 }
 
-func (authClient *AuthClient) BuiltInLogin(options api.BuiltInAuthDriver, username, password string) (*oauth2.Token, error) {
+func (authClient *AuthClient) DatabaseLogin(options api.DatabaseAuthDriver, username, password string) (*oauth2.Token, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
@@ -136,7 +136,7 @@ func (authClient *AuthClient) BuiltInLogin(options api.BuiltInAuthDriver, userna
 		return nil, errors.New("Error parsing Database Auth data into json")
 	}
 
-	response, err := ctxhttp.Post(ctx, http.DefaultClient, *authClient.APIServer+"/v1/auth/builtin/login", "application/json", bytes.NewBuffer(jsonData))
+	response, err := ctxhttp.Post(ctx, http.DefaultClient, *authClient.APIServer+"/v1/auth/database/login", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut

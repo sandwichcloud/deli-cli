@@ -49,7 +49,7 @@ type ClientInterface interface {
 type AuthClientInterface interface {
 	DiscoverAuth() (api.AuthDiscover, error)
 	GithubLogin(options api.GithubAuthDriver, username, password, otpCode string) (*oauth2.Token, error)
-	BuiltInLogin(options api.BuiltInAuthDriver, username, password string) (*oauth2.Token, error)
+	DatabaseLogin(options api.DatabaseAuthDriver, username, password string) (*oauth2.Token, error)
 	ScopeToken(project *api.Project) (*oauth2.Token, error)
 	TokenInfo() (*api.TokenInfo, error)
 }

@@ -32,12 +32,12 @@ type createCommand struct {
 func (c *createCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("create", "Create an image").Action(c.action)
 	c.name = command.Arg("name", "The image name").Required().String()
-	c.regionID = command.Flag("regionID", "The region to launch the instance in").Required().String()
-	c.zoneID = command.Flag("zoneID", "The zone to launch the instance in").Default("").String()
-	c.imageID = command.Flag("imageID", "The image to launch the instance from").Required().String()
-	c.serviceAccountID = command.Flag("serviceAccountID", "The service account to attach to the instance").Default("").String()
-	c.networkID = command.Flag("networkID", "The network to attach the instance to").Required().String()
-	c.keypairIDs = command.Flag("keypairID", "An ID of a keypair to add to the instance").Strings()
+	c.regionID = command.Flag("region-id", "The region to launch the instance in").Required().String()
+	c.zoneID = command.Flag("zone-id", "The zone to launch the instance in").Default("").String()
+	c.imageID = command.Flag("image-id", "The image to launch the instance from").Required().String()
+	c.serviceAccountID = command.Flag("service-account-id", "The service account to attach to the instance").Default("").String()
+	c.networkID = command.Flag("network-id", "The network to attach the instance to").Required().String()
+	c.keypairIDs = command.Flag("keypair-id", "An ID of a keypair to add to the instance").Strings()
 	c.tags = command.Flag("tag", "A metadata tag to add to the instance").StringMap()
 }
 
