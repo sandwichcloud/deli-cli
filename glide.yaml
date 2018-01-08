@@ -16,3 +16,5 @@ import:
   version: 0fd34425a5aee40ff3f260b34e6c3b0d59f58c66
 - package: github.com/fatih/structs
   version: ^1.0.0
+- package: github.com/tarm/serial
+  version: fdb95b50820e236308fffabc41ccf23f3056be77

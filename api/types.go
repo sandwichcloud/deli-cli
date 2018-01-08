@@ -93,7 +93,6 @@ type ImageList struct {
 }
 
 type TokenInfo struct {
-	UserID             uuid.UUID `json:"user_id,omitempty"`
 	Username           string    `json:"username,omitempty"`
 	Driver             string    `json:"driver,omitempty"`
 	ServiceAccountID   uuid.UUID `json:"service_account_id,omitempty"`

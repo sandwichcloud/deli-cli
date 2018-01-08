@@ -55,6 +55,12 @@ func (c *loginCommand) action(app *kingpin.Application, element *kingpin.ParseEl
 	c.Application.AuthTokens = &cmd.AuthTokens{
 		Unscoped: token,
 	}
+
+	if *c.method == "metadata" {
+		// Metadata's token is always scoped
+		c.Application.AuthTokens.Scoped = c.Application.AuthTokens.Unscoped
+	}
+
 	c.Application.SaveCreds()
 
 	if *raw {

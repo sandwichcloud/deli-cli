@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
-	"net/http"
 	"os"
 
 	"time"
@@ -17,12 +15,9 @@ import (
 	"encoding/json"
 
 	"github.com/alecthomas/kingpin"
-	"github.com/sandwichcloud/deli-cli/api"
 	"github.com/sandwichcloud/deli-cli/api/client"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/net/context/ctxhttp"
 	"golang.org/x/oauth2"
-	"gopkg.in/yaml.v2"
 )
 
 type AuthTokens struct {
@@ -85,9 +80,6 @@ func (app *Application) LoadCreds() error {
 	creds_file := path.Join(u.HomeDir, ".sandwich", "credentials")
 	creds_data, err := ioutil.ReadFile(creds_file)
 	if err != nil {
-		if os.IsNotExist(err) {
-			return app.loadCredsMetadata()
-		}
 		return errors.New("Cannot read existing sandwich cloud credentials. Have you logged in?")
 	}
 
@@ -102,73 +94,6 @@ func (app *Application) LoadCreds() error {
 	}
 
 	app.AuthTokens = tokens
-	return nil
-}
-
-func (app *Application) loadCredsMetadata() error {
-	cloudFile := path.Join(string(os.PathSeparator), "etc", "cloud", "cloud.cfg")
-	cloudConfigFileData, err := ioutil.ReadFile(cloudFile)
-	if err != nil {
-		return errors.New("Could not read cloud-init config to find metadata service")
-	}
-
-	type cloudConfig struct {
-		Datasource struct {
-			NoCloud struct {
-				SeedFrom string `json:"seedfrom"`
-			} `json:"NoCloud"`
-		} `json:"datasource"`
-	}
-
-	cloudConfigData := &cloudConfig{}
-	yaml.Unmarshal(cloudConfigFileData, cloudConfigData)
-	metadataURL := cloudConfigData.Datasource.NoCloud.SeedFrom
-	if metadataURL == "" {
-		return errors.New("Could not find metadata service.")
-	}
-
-	ctx, cancel := api.CreateTimeoutContext()
-	defer cancel()
-
-	response, err := ctxhttp.Get(ctx, http.DefaultClient, metadataURL+"/security/creds")
-	if err != nil {
-		if err == context.DeadlineExceeded {
-			return api.ErrTimedOut
-		}
-		return err
-	}
-
-	responseData, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-	response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		apiError, err := api.ParseErrors(response.StatusCode, responseData)
-		if err != nil {
-			return err
-		}
-		return apiError
-	}
-
-	type secCreds struct {
-		Token string `json:"token"`
-	}
-
-	serviceAccountToken := &secCreds{}
-	json.Unmarshal(responseData, serviceAccountToken)
-	oauthToken := &oauth2.Token{
-		AccessToken: serviceAccountToken.Token,
-		TokenType:   "Bearer",
-		Expiry:      time.Now().Add(10 * time.Minute),
-	}
-	tokens := &AuthTokens{
-		Unscoped: oauthToken,
-		Scoped:   oauthToken,
-	}
-	app.AuthTokens = tokens
-
 	return nil
 }
 

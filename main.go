@@ -6,6 +6,7 @@ import (
 	"github.com/sandwichcloud/deli-cli/cmd/image"
 	"github.com/sandwichcloud/deli-cli/cmd/instance"
 	"github.com/sandwichcloud/deli-cli/cmd/keypair"
+	"github.com/sandwichcloud/deli-cli/cmd/metadata"
 	"github.com/sandwichcloud/deli-cli/cmd/network"
 	"github.com/sandwichcloud/deli-cli/cmd/policy"
 	"github.com/sandwichcloud/deli-cli/cmd/project"
@@ -52,6 +53,9 @@ func main() {
 
 	keypairCommand := keypair.Command{}
 	keypairCommand.Register(app)
+
+	metaDataCommand := metadata.Command{}
+	metaDataCommand.Register(app)
 
 	app.Run()
 }

@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/howeyc/gopass"
 	"github.com/sandwichcloud/deli-cli/api/client"
 	"github.com/sandwichcloud/deli-cli/api/client/auth"
+	"github.com/sandwichcloud/deli-cli/metadata"
 	"golang.org/x/oauth2"
 )
 
@@ -62,6 +64,24 @@ func Login(authClient client.AuthClientInterface, username, password, authMethod
 			password = string(passwordBytes)
 		}
 		token, err = authClient.DatabaseLogin(*apiDiscover.Database, username, password)
+	case "metadata":
+		mClient := metadata.MetaDataClient{SerialPort: "/dev/ttyS0"}
+
+		err := mClient.Connect()
+		if err != nil {
+			return nil, err
+		}
+
+		tokenString, err := mClient.GetSecurityData()
+		if err != nil {
+			return nil, err
+		}
+
+		token = &oauth2.Token{
+			AccessToken: tokenString,
+			TokenType:   "Bearer",
+			Expiry:      time.Now().Add(30 * time.Minute),
+		}
 	default:
 		return nil, errors.New(fmt.Sprintf("Unknown API Auth Driver %s", authMethod))
 	}
