@@ -155,6 +155,8 @@ type Instance struct {
 	Tags             map[string]string `json:"tags"`
 	KeypairIDs       []uuid.UUID       `json:"keypair_ids"`
 	State            string            `json:"state"`
+	PowerState       string            `json:"power_state"`
+	Task             string            `json:"task"`
 	ErrorMessage     string            `json:"error_message"`
 	CreatedAt        time.Time         `json:"created_at"`
 }
