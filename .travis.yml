@@ -1,14 +1,30 @@
 language: go
 go:
 - 1.8
+services:
+- docker
+addons:
+  apt:
+    packages:
+      - docker-ce
 install:
+- docker --version
 - curl https://glide.sh/get | sh
 - glide install
+env:
+  global:
+    - secure: Xir3AwIKr07bPyLg8d3hiYCSnKQpRo4i2qNDQVLNJztgBHBcYQCs/Wlz9+yHTXzndyBhbmdDEnJ2GnL5UvNkuVeNud6tp76/obtXelaIrjiTDHigea0vTnhC3WV9CcA7rHDp9pgv5lGfUFUUU+96zDMfcLH7fKtAb6XOPiz/UNoqWNYez6FyWpJu0pzgM7NCF/XU2HAHgI+cnUETk9IdYypS1CyWsrJMuJumj8XNZzNKKNV+64KPYuE1UgJXRbmcgqnpReYAx7bJs8voFUojKNOL58fINjcYgHOPmk+3ej33Dj5QA63Co5Bwx6cDhaAJGBzK79iSjMMe16s7dTUw7DV5YMFLsVBOqXsJ508H8xF8S0pBoe37kc3/ra7Gcc5ZRV7eGRstfEhK+kvqlcvwqfT2o1Kiu7moIo9aDfXAHMvyFqxc9LyO0e+6UdW7o2OvlS5XA314DVS/sVhXF9EmZNTepM1qTkwaQJMN2CDJ0bThvR2ebE32tMMIdyWN+xoOd5lgEFCUPGd5i0hY8vU02LiiFRaU2BXiethuqrVbWs/2EsKPTVGzKV6EU4T3Pggq9PgJeHen7IXppGp0BbxZ6NX3tJdrtPtLaqdVMPoaGvfozLQQmh16aPs5aqvBIrMlyfop734CrwiZ6kH3VpdfS0MZhQwDf2K5y4ZN8kz3AQU=
+    - secure: sffJnsVd9uwYH1g1t11ufCdSbJWv8xmoGG3vxuU7k8S9Q0wWpRdFW9eORjMtDj/szhNedfTTINZKvouVWaNqoGPSy6CMbX87qtbbEFUrtMqRwG+qWbSxf0HMqItRp93vBV9zF39z0BSW2Ku1VN2C3qGiWeMBcxr8L+CsLEt+OuW1LJ3fiweTV+oCAn6zG+Nn+XwX7jjnvkfxJmWkBV2lcN/e5+W6qHS2ytJiNxBW86K2CrXJQ5ROM/IOC5hqzqTx8+0qb6YXaP1KFzzIQIS5BFaHYDU3xfeVw+1dAMmDcJlg+ojWJi/8UoqgwoRuh/ntRghh4oW2dStxylTIFqDRAKcyAV0hAnyFdEC7N1r3K48I51U2uLaviVvJPAQLAADZsbIZIc4Dh9eUIdgh/+yig2NrZPWn9L4F4red94RL+PpZS+4nF+6x64hQGj/EfTakLVHjmE/7jBxCKsGMGdt/7xb6la4gFK1BMkiP2yqGod6Qq2goUzxD/+hIZtgnMLTIWle1+pt80yQ8I8yuEwF63dCQ1EOdN+WKP7rRC2M5uD1tmh5ywY/tznvPW1tSad5qggZxVi9YaLRjEu6KL3khTXNXUK5/O/do5gnYStWdCDkaCnbDYJNBdvW7z63WMJY/kr1z40Yw5g53DC3kPsBAe6blXqedd75wGz8t7rTDfKc=
 script:
-  - |
-    make build-linux;
-    make build-windows;
-    make build-osx;
+  - make build-linux
+  - make build-windows
+  - make build-osx
+  - docker build -t sandwichcloud/deli-cli:latest .
+  - if [ -n "$TRAVIS_TAG" ]; then  docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"; fi
+  - if [ -n "$TRAVIS_TAG" ]; then  docker tag sandwichcloud/deli-cli:latest "sandwichcloud/deli-cli:$TRAVIS_TAG"; fi
+  - if [ -n "$TRAVIS_TAG" ]; then  docker push "sandwichcloud/deli-cli:$TRAVIS_TAG"; fi
+  - if [ -n "$TRAVIS_TAG" ]; then  docker push sandwichcloud/deli-cli:latest; fi
+
 deploy:
   provider: releases
   skip_cleanup: true
