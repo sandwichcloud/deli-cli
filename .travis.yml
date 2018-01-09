@@ -1,0 +1,20 @@
+language: go
+go:
+- 1.8
+os:
+- linux
+- osx
+install:
+- curl https://glide.sh/get | sh
+- glide install
+script:
+- if [[ "$TRAVIS_OS_NAME" != "osx" ]] make build-linux make build-windows else make
+  build-osx fi
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: qfwFL+xrcERlC2bWbpvfi7hMd7DEJKaoThG/p0M42duXoUkz2VtDOE2a2773WHDQ1AqRbO6U4a1W4BZzghgqMFyuD6VZk98V9z+AgAyApM92bKQMJCv8ce+Viv9MbY3L2vS73+FILeceM1zck3k33HaPZI6/LXwIF5hqfXU8ARMfcxMr5F1wyi1S8T6qVwDop5Hmhf1HT4yQ9KjCHlYsKRtLXAfWSe5+Dt01XvbZD6WmEil/YE3NFQWo2PudtZ3VLsFNskcYlSiY2862yqzY2/BNYnhhDL274Z1GaRAWMEJo+3JXuTxvFvbRq164anEq8nQ7C15vT3vhHlTWlqTCWGReortzpgtlx4fagKbnChFnZonf/Ofhs/rUwBrwAvdLHYIU2I9ghLJjmjcefazYUWyVhDooFhYwBLNKNqlbyE9qj5M6WmpVtbcvkFMLPBLXc9itgETYlF5eV5RrrYDeztutt9ClRIoICrXwYOVnY5Us+vUSVqhPXFz5NB0M6AejgJTLyjyeQ7ZWzv4Hs7SYeYMHEOJtqOJIiWIheXZFD5MhVOJd79iOXIB5pSz7hxRiG5Jb/bsoYRU5wGb/sHsxVvKfX4IH3y74PfLUo5vKasUxf5Ff+mYwr22gEJBgmhFQ96Pn2/EkOUbLe+WqQdrkzf6IrRfiNHWyqv8CljwkyEA=
+  file: bin/*
+  on:
+    tags: true
