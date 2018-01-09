@@ -5,40 +5,21 @@ import (
 	"encoding/base64"
 	"strings"
 	"time"
-
-	"github.com/tarm/serial"
 )
 
 type MetaDataClient struct {
-	SerialPort   string
-	serialClient *serial.Port
+	serialClient serialClientInterface
 }
 
-func (client *MetaDataClient) Connect() error {
-	config := &serial.Config{
-		Name:        client.SerialPort,
-		Baud:        115200,
-		ReadTimeout: 1 * time.Second,
-	}
-
-	serialClient, err := serial.OpenPort(config)
-	if err != nil {
-		return nil
-	}
-	client.serialClient = serialClient
-	return nil
+type serialClientInterface interface {
+	Connect(serialPort string) error
+	WriteLine(line string) error
+	ReadByte() (byte, error)
 }
 
-func (client *MetaDataClient) readByte() (byte, error) {
-	buf := make([]byte, 1)
-
-	n, _ := client.serialClient.Read(buf)
-
-	if n == 0 {
-		return byte(0), NothingToRead
-	}
-
-	return buf[0], nil
+func (client *MetaDataClient) Connect(serialPort string) error {
+	client.serialClient = &SerialClient{}
+	return client.serialClient.Connect(serialPort)
 }
 
 func (client *MetaDataClient) readLine(ctx context.Context) (string, error) {
@@ -48,7 +29,7 @@ func (client *MetaDataClient) readLine(ctx context.Context) (string, error) {
 		if ctx.Err() != nil {
 			break
 		}
-		b, err := client.readByte()
+		b, err := client.serialClient.ReadByte()
 		if err != nil {
 			if err == NothingToRead {
 				continue
@@ -87,14 +68,9 @@ func (client *MetaDataClient) readPacket(ctx context.Context) (string, string, e
 	return packetCode, string(packetDataBytes), nil
 }
 
-func (client *MetaDataClient) writeLine(line string) error {
-	_, err := client.serialClient.Write([]byte(line + "\n"))
-	return err
-}
-
 func (client *MetaDataClient) writePacket(packetCode, data string) error {
 	packet := "!!" + packetCode + "#" + base64.StdEncoding.EncodeToString([]byte(data))
-	return client.writeLine(packet)
+	return client.serialClient.WriteLine(packet)
 }
 
 func (client *MetaDataClient) getData(txPacketCode, rxPacketCode string) (string, error) {

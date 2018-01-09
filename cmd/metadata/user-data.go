@@ -18,9 +18,8 @@ func (c *userDataCommand) Register(cmd *kingpin.CmdClause) {
 
 func (c *userDataCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 
-	mClient := metadata.MetaDataClient{SerialPort: "/dev/ttyS0"}
-
-	err := mClient.Connect()
+	mClient := metadata.MetaDataClient{}
+	err := mClient.Connect("/dev/ttyS0")
 	if err != nil {
 		return err
 	}

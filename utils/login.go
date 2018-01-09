@@ -65,9 +65,8 @@ func Login(authClient client.AuthClientInterface, username, password, authMethod
 		}
 		token, err = authClient.DatabaseLogin(*apiDiscover.Database, username, password)
 	case "metadata":
-		mClient := metadata.MetaDataClient{SerialPort: "/dev/ttyS0"}
-
-		err := mClient.Connect()
+		mClient := metadata.MetaDataClient{}
+		err := mClient.Connect("/dev/ttyS0")
 		if err != nil {
 			return nil, err
 		}
