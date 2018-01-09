@@ -9,11 +9,11 @@ install:
 - glide install
 script:
   - |
-    if [[ "$TRAVIS_OS_NAME" != "osx" ]]
-      make build-linux
-      make build-windows
+    if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
+      make build-linux;
+      make build-windows;
     else
-      make build-osx
+      make build-osx;
     fi
 deploy:
   provider: releases
