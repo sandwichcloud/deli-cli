@@ -8,8 +8,13 @@ install:
 - curl https://glide.sh/get | sh
 - glide install
 script:
-- if [[ "$TRAVIS_OS_NAME" != "osx" ]] make build-linux make build-windows else make
-  build-osx fi
+  - |
+    if [[ "$TRAVIS_OS_NAME" != "osx" ]]
+      make build-linux
+      make build-windows
+    else
+      make build-osx
+    fi
 deploy:
   provider: releases
   skip_cleanup: true
