@@ -13,9 +13,13 @@ func (c *Command) Register(app *cmd.Application) {
 	command := app.CLIApp.Command("keypair", "Sandwich Cloud keypair commands")
 	raw = command.Flag("raw", "Show raw json output").Bool()
 
-	createCommand := createCommand{raw: raw}
-	createCommand.Application = c.Application
-	createCommand.Register(command)
+	generateCommand := generateCommand{raw: raw}
+	generateCommand.Application = c.Application
+	generateCommand.Register(command)
+
+	importCommand := importCommand{raw: raw}
+	importCommand.Application = c.Application
+	importCommand.Register(command)
 
 	inspectCommand := inspectCommand{raw: raw}
 	inspectCommand.Application = c.Application
