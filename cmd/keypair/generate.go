@@ -9,8 +9,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"os/user"
 	"path"
+	"path/filepath"
 
 	"github.com/alecthomas/kingpin"
 	"github.com/fatih/structs"
@@ -29,15 +31,9 @@ type generateCommand struct {
 
 func (c *generateCommand) Register(cmd *kingpin.CmdClause) {
 
-	u, err := user.Current()
-	if err != nil {
-		panic("Cannot find the current system user.")
-	}
-	keyPath := path.Join(u.HomeDir, ".ssh")
-
 	command := cmd.Command("generate", "Generate a keypair").Action(c.action)
 	c.name = command.Arg("name", "The keypair name").Required().String()
-	c.keyPath = command.Flag("key-dir", "Directory to save the keypair to").Default(keyPath).ExistingFileOrDir()
+	c.keyPath = command.Flag("key-dir", "Directory to save the keypair to").Default("~/.ssh").String()
 }
 
 func (c *generateCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -48,6 +44,19 @@ func (c *generateCommand) action(app *kingpin.Application, element *kingpin.Pars
 	err = c.Application.SetScopedToken()
 	if err != nil {
 		return err
+	}
+
+	keyPath := *c.keyPath
+	if keyPath[0] == '~' {
+		u, err := user.Current()
+		if err != nil {
+			panic("Cannot find the current system user.")
+		}
+		keyPath = filepath.Join(u.HomeDir, keyPath[1:])
+	}
+
+	if _, err := os.Stat(keyPath); err != nil {
+		return errors.New(keyPath + " does not exist.")
 	}
 
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2046)
@@ -66,7 +75,7 @@ func (c *generateCommand) action(app *kingpin.Application, element *kingpin.Pars
 		}
 		return err
 	} else {
-		err := ioutil.WriteFile(path.Join(*c.keyPath, "id_"+*c.name), privateKeyBytes, 0600)
+		err := ioutil.WriteFile(path.Join(keyPath, "id_"+*c.name), privateKeyBytes, 0600)
 		if err != nil {
 			return err
 		}
@@ -75,7 +84,7 @@ func (c *generateCommand) action(app *kingpin.Application, element *kingpin.Pars
 			keypairBytes, _ := json.MarshalIndent(keyPairMap, "", "  ")
 			fmt.Println(string(keypairBytes))
 		} else {
-			logrus.Infof("Keypair '%s' created with an ID of '%s' and saved to '%s'", keypair.Name, keypair.ID, *c.keyPath)
+			logrus.Infof("Keypair '%s' created with an ID of '%s' and saved to '%s'", keypair.Name, keypair.ID, keyPath)
 		}
 	}
 
