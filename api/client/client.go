@@ -9,7 +9,8 @@ import (
 
 	"github.com/sandwichcloud/deli-cli/api"
 	"github.com/sandwichcloud/deli-cli/api/client/auth"
-	"github.com/sandwichcloud/deli-cli/api/client/builtin"
+	"github.com/sandwichcloud/deli-cli/api/client/database"
+	"github.com/sandwichcloud/deli-cli/api/client/flavor"
 	"github.com/sandwichcloud/deli-cli/api/client/image"
 	"github.com/sandwichcloud/deli-cli/api/client/instance"
 	"github.com/sandwichcloud/deli-cli/api/client/keypair"
@@ -31,7 +32,7 @@ type SandwichClient struct {
 type ClientInterface interface {
 	createOAuthClient() *http.Client
 	Auth() AuthClientInterface
-	BuiltInAuth() BuiltInAuthClientInterface
+	DatabaseAuth() DatabaseAuthClientInterface
 	Project() ProjectClientInterface
 	Region() RegionClientInterface
 	Zone() ZoneClientInterface
@@ -39,6 +40,7 @@ type ClientInterface interface {
 	Network() NetworkClientInterface
 	NetworkPort() NetworkPortClientInterface
 	Keypair() KeypairClientInterface
+	Flavor() FlavorClientInterface
 	Instance() InstanceClientInterface
 	Policy() PolicyClientInterface
 	Role() RoleClientInterface
@@ -54,11 +56,11 @@ type AuthClientInterface interface {
 	TokenInfo() (*api.TokenInfo, error)
 }
 
-type BuiltInAuthClientInterface interface {
-	Create(username, password string) (*api.BuiltInUser, error)
-	Get(id string) (*api.BuiltInUser, error)
+type DatabaseAuthClientInterface interface {
+	Create(username, password string) (*api.DatabaseUser, error)
+	Get(id string) (*api.DatabaseUser, error)
 	Delete(id string) error
-	List(limit int, marker string) (*api.BuiltInUserList, error)
+	List(limit int, marker string) (*api.DatabaseUserList, error)
 	ChangePassword(id, password string) error
 	AddRole(id, role string) error
 	RemoveRole(id, role string) error
@@ -109,8 +111,15 @@ type NetworkPortClientInterface interface {
 	Delete(id string) error
 }
 
+type FlavorClientInterface interface {
+	Create(name string, vcpus, ram, disk int) (*api.Flavor, error)
+	Get(id string) (*api.Flavor, error)
+	Delete(id string) error
+	List(limit int, marker string) (*api.FlavorList, error)
+}
+
 type InstanceClientInterface interface {
-	Create(name, imageID, regionID, zoneID, networkID, serviceAccountID string, keypairIDs []string, tags map[string]string) (*api.Instance, error)
+	Create(name, imageID, regionID, zoneID, networkID, serviceAccountID string, flavorID string, disk int, keypairIDs []string, tags map[string]string) (*api.Instance, error)
 	Get(id string) (*api.Instance, error)
 	Delete(id string) error
 	List(imageID string, limit int, marker string) (*api.InstanceList, error)
@@ -162,8 +171,8 @@ func (client *SandwichClient) Auth() AuthClientInterface {
 	return authClient
 }
 
-func (client *SandwichClient) BuiltInAuth() BuiltInAuthClientInterface {
-	return &builtin.BuiltInAuthClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient()}
+func (client *SandwichClient) DatabaseAuth() DatabaseAuthClientInterface {
+	return &database.DatabaseAuthClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient()}
 }
 
 func (client *SandwichClient) Project() ProjectClientInterface {
@@ -192,6 +201,10 @@ func (client *SandwichClient) NetworkPort() NetworkPortClientInterface {
 
 func (client *SandwichClient) Keypair() KeypairClientInterface {
 	return &keypair.KeypairClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient()}
+}
+
+func (client *SandwichClient) Flavor() FlavorClientInterface {
+	return &flavor.FlavorClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient()}
 }
 
 func (client *SandwichClient) Instance() InstanceClientInterface {

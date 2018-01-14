@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/sandwichcloud/deli-cli/cmd"
 	"github.com/sandwichcloud/deli-cli/cmd/auth"
+	"github.com/sandwichcloud/deli-cli/cmd/flavor"
 	"github.com/sandwichcloud/deli-cli/cmd/image"
 	"github.com/sandwichcloud/deli-cli/cmd/instance"
 	"github.com/sandwichcloud/deli-cli/cmd/keypair"
@@ -32,6 +33,9 @@ func main() {
 
 	zoneCommand := zone.Command{}
 	zoneCommand.Register(app)
+
+	flavorCommand := flavor.Command{}
+	flavorCommand.Register(app)
 
 	imageCommand := image.Command{}
 	imageCommand.Register(app)

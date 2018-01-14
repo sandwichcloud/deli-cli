@@ -144,6 +144,20 @@ type NetworkPortList struct {
 	NetworkPorts []NetworkPort `json:"network-ports"`
 }
 
+type Flavor struct {
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	VCPUS     int       `json:"vcpus"`
+	Ram       int       `json:"ram"`
+	Disk      int       `json:"disk"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type FlavorList struct {
+	Links   []pageLinks `json:"flavors_links"`
+	Flavors []Flavor    `json:"flavors"`
+}
+
 type Instance struct {
 	ID               uuid.UUID         `json:"id"`
 	Name             string            `json:"name"`
@@ -154,6 +168,10 @@ type Instance struct {
 	ServiceAccountID uuid.UUID         `json:"service_account_id"`
 	Tags             map[string]string `json:"tags"`
 	KeypairIDs       []uuid.UUID       `json:"keypair_ids"`
+	FlavorID         uuid.UUID         `json:"flavor_id"`
+	VCPUS            int               `json:"vcpus"`
+	Ram              int               `json:"ram"`
+	Disk             int               `json:"disk"`
 	State            string            `json:"state"`
 	PowerState       string            `json:"power_state"`
 	Task             string            `json:"task"`
@@ -204,14 +222,14 @@ type ServiceAccountList struct {
 	ServiceAccounts []ServiceAccount `json:"service-accounts"`
 }
 
-type BuiltInUser struct {
+type DatabaseUser struct {
 	ID        uuid.UUID `json:"id"`
 	Username  string    `json:"username"`
 	Roles     []string  `json:"roles"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type BuiltInUserList struct {
-	Links []pageLinks   `json:"users_links"`
-	Users []BuiltInUser `json:"users"`
+type DatabaseUserList struct {
+	Links []pageLinks    `json:"users_links"`
+	Users []DatabaseUser `json:"users"`
 }

@@ -1,4 +1,4 @@
-package builtin
+package database
 
 import (
 	"bytes"
@@ -13,12 +13,12 @@ import (
 	"golang.org/x/net/context/ctxhttp"
 )
 
-type BuiltInAuthClient struct {
+type DatabaseAuthClient struct {
 	APIServer  *string
 	HttpClient *http.Client
 }
 
-func (client *BuiltInAuthClient) Create(username, password string) (*api.BuiltInUser, error) {
+func (client *DatabaseAuthClient) Create(username, password string) (*api.DatabaseUser, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
@@ -30,7 +30,7 @@ func (client *BuiltInAuthClient) Create(username, password string) (*api.BuiltIn
 	body := createBody{Username: username, Password: password}
 	jsonBody, _ := json.Marshal(body)
 
-	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/v1/auth/builtin/users", "application/json", bytes.NewBuffer(jsonBody))
+	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/v1/auth/database/users", "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -52,16 +52,16 @@ func (client *BuiltInAuthClient) Create(username, password string) (*api.BuiltIn
 		return nil, apiError
 	}
 
-	user := &api.BuiltInUser{}
+	user := &api.DatabaseUser{}
 	json.Unmarshal(responseData, user)
 	return user, nil
 }
 
-func (client *BuiltInAuthClient) Get(id string) (*api.BuiltInUser, error) {
+func (client *DatabaseAuthClient) Get(id string) (*api.DatabaseUser, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
-	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/v1/auth/builtin/users/"+id)
+	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/v1/auth/database/users/"+id)
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -83,15 +83,15 @@ func (client *BuiltInAuthClient) Get(id string) (*api.BuiltInUser, error) {
 		return nil, apiError
 	}
 
-	user := &api.BuiltInUser{}
+	user := &api.DatabaseUser{}
 	json.Unmarshal(responseData, user)
 	return user, nil
 }
 
-func (client *BuiltInAuthClient) Delete(id string) error {
+func (client *DatabaseAuthClient) Delete(id string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
-	Url, err := url.Parse(*client.APIServer + "/v1/auth/builtin/users/" + id)
+	Url, err := url.Parse(*client.APIServer + "/v1/auth/database/users/" + id)
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func (client *BuiltInAuthClient) Delete(id string) error {
 	return nil
 }
 
-func (client *BuiltInAuthClient) List(limit int, marker string) (*api.BuiltInUserList, error) {
+func (client *DatabaseAuthClient) List(limit int, marker string) (*api.DatabaseUserList, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 	parameters := url.Values{}
@@ -136,7 +136,7 @@ func (client *BuiltInAuthClient) List(limit int, marker string) (*api.BuiltInUse
 		parameters.Add("marker", marker)
 	}
 
-	Url, err := url.Parse(*client.APIServer + "/v1/auth/builtin/users")
+	Url, err := url.Parse(*client.APIServer + "/v1/auth/database/users")
 	if err != nil {
 		return nil, err
 	}
@@ -164,20 +164,20 @@ func (client *BuiltInAuthClient) List(limit int, marker string) (*api.BuiltInUse
 		return nil, apiError
 	}
 
-	users := &api.BuiltInUserList{}
+	users := &api.DatabaseUserList{}
 	json.Unmarshal(responseData, users)
 	return users, nil
 }
 
-func (client *BuiltInAuthClient) ChangePassword(id, password string) error {
+func (client *DatabaseAuthClient) ChangePassword(id, password string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 	var Url *url.URL
 	var err error
 	if id == "" {
-		Url, err = url.Parse(*client.APIServer + "/v1/auth/builtin/users")
+		Url, err = url.Parse(*client.APIServer + "/v1/auth/database/users")
 	} else {
-		Url, err = url.Parse(*client.APIServer + "/v1/auth/builtin/users/" + id)
+		Url, err = url.Parse(*client.APIServer + "/v1/auth/database/users/" + id)
 	}
 	if err != nil {
 		return err
@@ -220,10 +220,10 @@ func (client *BuiltInAuthClient) ChangePassword(id, password string) error {
 	return nil
 }
 
-func (client *BuiltInAuthClient) AddRole(id, role string) error {
+func (client *DatabaseAuthClient) AddRole(id, role string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
-	Url, err := url.Parse(*client.APIServer + "/v1/auth/builtin/users/" + id + "/role/add")
+	Url, err := url.Parse(*client.APIServer + "/v1/auth/database/users/" + id + "/role/add")
 	if err != nil {
 		return err
 	}
@@ -265,10 +265,10 @@ func (client *BuiltInAuthClient) AddRole(id, role string) error {
 	return nil
 }
 
-func (client *BuiltInAuthClient) RemoveRole(id, role string) error {
+func (client *DatabaseAuthClient) RemoveRole(id, role string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
-	Url, err := url.Parse(*client.APIServer + "/v1/auth/builtin/users/" + id + "/role/remove")
+	Url, err := url.Parse(*client.APIServer + "/v1/auth/database/users/" + id + "/role/remove")
 	if err != nil {
 		return err
 	}
