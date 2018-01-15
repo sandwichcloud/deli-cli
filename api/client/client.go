@@ -93,9 +93,12 @@ type ImageClientInterface interface {
 	Create(name, regionID, fileName, visibility string) (*api.Image, error)
 	Get(id string) (*api.Image, error)
 	Delete(id string) error
-	List(limit int, marker string) (*api.ImageList, error)
+	List(visibility string, limit int, marker string) (*api.ImageList, error)
 	ActionLock(id string) error
 	ActionUnlock(id string) error
+	MemberAdd(id, projectID string) error
+	MemberList(id string) (*api.ImageMemberList, error)
+	MemberRemove(id, projectID string) error
 }
 
 type KeypairClientInterface interface {

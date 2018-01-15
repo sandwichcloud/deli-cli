@@ -316,11 +316,11 @@ func (client *InstanceClient) ActionImage(id string, name string, visibility str
 	defer cancel()
 
 	type createBody struct {
-		Name string `json:"name"`
-		//Visibility string `json:"visibility"`
+		Name       string `json:"name"`
+		Visibility string `json:"visibility"`
 	}
 
-	body := createBody{Name: name /*Visibility: visibility*/}
+	body := createBody{Name: name, Visibility: visibility}
 	jsonBody, _ := json.Marshal(body)
 
 	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+fmt.Sprintf("/v1/instances/%s/action/image", id), "application/json", bytes.NewBuffer(jsonBody))

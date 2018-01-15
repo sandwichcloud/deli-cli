@@ -1,4 +1,4 @@
-package image
+package member
 
 import (
 	"encoding/json"
@@ -19,16 +19,13 @@ import (
 
 type listCommand struct {
 	cmd.Command
-	limit      *int
-	marker     *string
-	visibility *string
+	imageID *string
+	raw     *bool
 }
 
 func (c *listCommand) Register(cmd *kingpin.CmdClause) {
-	command := cmd.Command("list", "List images").Action(c.action)
-	c.visibility = command.Flag("visibility", "The visibility state to filter by (PUBLIC, SHARED, PRIVATE)").Default("PRIVATE").Enum("PUBLIC", "SHARED", "PRIVATE")
-	c.limit = command.Flag("limit", "Number of projects to show per page").Default("20").Int()
-	c.marker = command.Flag("marker", "Marker Token for the next page of results").String()
+	command := cmd.Command("list", "List image members").Action(c.action)
+	c.imageID = command.Arg("image ID", "The image ID").Required().String()
 }
 
 func (c *listCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -40,28 +37,28 @@ func (c *listCommand) action(app *kingpin.Application, element *kingpin.ParseEle
 	if err != nil {
 		return err
 	}
-	images, err := c.Application.APIClient.Image().List(*c.visibility, *c.limit, *c.marker)
+	imageMembers, err := c.Application.APIClient.Image().MemberList(*c.imageID)
 	if err != nil {
-		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
+		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
 		}
 		return err
 	} else {
-		if *raw {
-			imageBytes, _ := json.MarshalIndent(images, "", "  ")
-			fmt.Println(string(imageBytes))
+		if *c.raw {
+			imageMembersBytes, _ := json.MarshalIndent(imageMembers, "", "  ")
+			fmt.Println(string(imageMembersBytes))
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Name", "ID"})
+			table.SetHeader([]string{"Project ID"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
-			if len(images.Links) == 1 {
-				nextPage := images.Links[0]
+			if len(imageMembers.Links) == 1 {
+				nextPage := imageMembers.Links[0]
 				nextPageUrl, _ := url.Parse(nextPage.HREF)
 				table.SetCaption(true, fmt.Sprintf("Next Page Marker %s", nextPageUrl.Query().Get("marker")))
 			}
 
-			for _, image := range images.Images {
-				table.Append([]string{image.Name, image.ID.String()})
+			for _, imageMember := range imageMembers.Members {
+				table.Append([]string{imageMember.ProjectID.String()})
 			}
 
 			table.Render()

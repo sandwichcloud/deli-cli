@@ -1,6 +1,9 @@
 package image
 
-import "github.com/sandwichcloud/deli-cli/cmd"
+import (
+	"github.com/sandwichcloud/deli-cli/cmd"
+	"github.com/sandwichcloud/deli-cli/cmd/image/member"
+)
 
 type Command struct {
 	cmd.Command
@@ -13,9 +16,9 @@ func (c *Command) Register(app *cmd.Application) {
 	command := app.CLIApp.Command("image", "Sandwich Cloud image commands")
 	raw = command.Flag("raw", "Show raw json output").Bool()
 
-	createCommand := createCommand{}
-	createCommand.Application = c.Application
-	createCommand.Register(command)
+	importCommand := importCommand{}
+	importCommand.Application = c.Application
+	importCommand.Register(command)
 
 	inspectCommand := inspectCommand{}
 	inspectCommand.Application = c.Application
@@ -28,4 +31,7 @@ func (c *Command) Register(app *cmd.Application) {
 	deleteCommand := deleteCommand{}
 	deleteCommand.Application = c.Application
 	deleteCommand.Register(command)
+
+	memberCommand := member.Command{Raw: raw}
+	memberCommand.Register(command)
 }

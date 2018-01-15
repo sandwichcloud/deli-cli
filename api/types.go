@@ -77,6 +77,7 @@ type ZoneList struct {
 
 type Image struct {
 	ID           uuid.UUID `json:"id"`
+	ProjectID    uuid.UUID `json:"project_id"`
 	Name         string    `json:"name"`
 	FileName     string    `json:"file_name"`
 	Visibility   string    `json:"visibility"`
@@ -90,6 +91,15 @@ type Image struct {
 type ImageList struct {
 	Links  []pageLinks `json:"images_links"`
 	Images []Image     `json:"images"`
+}
+
+type ImageMemberList struct {
+	Links   []pageLinks   `json:"members_links"`
+	Members []ImageMember `json:"members"`
+}
+
+type ImageMember struct {
+	ProjectID uuid.UUID `json:"project_id"`
 }
 
 type TokenInfo struct {
@@ -137,6 +147,8 @@ type NetworkPort struct {
 	ID        uuid.UUID `json:"id"`
 	NetworkID uuid.UUID `json:"network_id"`
 	IPAddress net.IP    `json:"ip_address"`
+	State     string    `json:"state"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type NetworkPortList struct {

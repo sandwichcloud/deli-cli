@@ -12,7 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type createCommand struct {
+type importCommand struct {
 	cmd.Command
 	name       *string
 	regionID   *string
@@ -20,15 +20,15 @@ type createCommand struct {
 	visibility *string
 }
 
-func (c *createCommand) Register(cmd *kingpin.CmdClause) {
-	command := cmd.Command("create", "Create an image").Action(c.action)
+func (c *importCommand) Register(cmd *kingpin.CmdClause) {
+	command := cmd.Command("import", "Import an image").Action(c.action)
 	c.name = command.Arg("name", "The image name").Required().String()
-	c.regionID = command.Flag("region-id", "The region to create the network in").Required().String()
+	c.regionID = command.Flag("region-id", "The region to create the image in").Required().String()
 	c.fileName = command.Arg("file name", "The image's file name").Required().String()
 	c.visibility = command.Flag("visibility", "The visibility state of the image (PUBLIC, SHARED, PRIVATE)").Default("PRIVATE").Enum("PUBLIC", "SHARED", "PRIVATE")
 }
 
-func (c *createCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *importCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func (c *createCommand) action(app *kingpin.Application, element *kingpin.ParseE
 			imageBytes, _ := json.MarshalIndent(image, "", "  ")
 			fmt.Println(string(imageBytes))
 		} else {
-			logrus.Infof("Image '%s' created with an ID of '%s'", image.Name, image.ID)
+			logrus.Infof("Image '%s' imported with an ID of '%s'", image.Name, image.ID)
 		}
 	}
 	return nil
