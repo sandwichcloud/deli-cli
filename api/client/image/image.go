@@ -1,6 +1,7 @@
 package image
 
 import (
+	"fmt"
 	"net/http"
 
 	"bytes"
@@ -20,18 +21,17 @@ type ImageClient struct {
 	HttpClient *http.Client
 }
 
-func (client *ImageClient) Create(name, regionID, fileName, visibility string) (*api.Image, error) {
+func (client *ImageClient) Create(name, regionID, fileName string) (*api.Image, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
 	type createBody struct {
-		Name       string `json:"name"`
-		RegionID   string `json:"region_id"`
-		FileName   string `json:"file_name"`
-		Visibility string `json:"visibility"`
+		Name     string `json:"name"`
+		RegionID string `json:"region_id"`
+		FileName string `json:"file_name"`
 	}
 
-	body := createBody{Name: name, RegionID: regionID, FileName: fileName, Visibility: visibility}
+	body := createBody{Name: name, RegionID: regionID, FileName: fileName}
 	jsonBody, _ := json.Marshal(body)
 
 	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/v1/images", "application/json", bytes.NewBuffer(jsonBody))
@@ -172,6 +172,46 @@ func (client *ImageClient) List(visibility string, limit int, marker string) (*a
 	images := &api.ImageList{}
 	json.Unmarshal(responseData, images)
 	return images, nil
+}
+
+func (client *ImageClient) ActionSetVisibility(id string, public bool) error {
+	ctx, cancel := api.CreateTimeoutContext()
+	defer cancel()
+
+	type stopBody struct {
+		Public bool `json:"public"`
+	}
+
+	body := stopBody{Public: public}
+	jsonBody, _ := json.Marshal(body)
+
+	req, err := http.NewRequest(http.MethodPut, *client.APIServer+fmt.Sprintf("/v1/images/%s/action/visibility", id), bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	response, err := ctxhttp.Do(ctx, client.HttpClient, req)
+	if err != nil {
+		if err == context.DeadlineExceeded {
+			return api.ErrTimedOut
+		}
+		return err
+	}
+
+	responseData, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return err
+	}
+	response.Body.Close()
+
+	if response.StatusCode != http.StatusNoContent {
+		apiError, err := api.ParseErrors(response.StatusCode, responseData)
+		if err != nil {
+			return err
+		}
+		return apiError
+	}
+	return nil
 }
 
 func (client *ImageClient) ActionLock(id string) error {

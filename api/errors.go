@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var ErrTimedOut error = errors.New("Timed out when communicating with the api server.")
+var ErrTimedOut = errors.New("Timed out when communicating with the api server.")
 
 type APIErrorInterface interface {
 	error
@@ -63,7 +63,7 @@ func (apiError APIError) Error() string {
 		return apiError.Message
 	}
 
-	errorStrings := []string{}
+	var errorStrings []string
 	for _, dataError := range apiError.Errors {
 		if dataError.Source.Pointer != "" {
 			pointerPath := strings.Split(dataError.Source.Pointer, "/")

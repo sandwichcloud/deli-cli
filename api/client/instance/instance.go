@@ -311,16 +311,15 @@ func (client *InstanceClient) ActionRestart(id string, hard bool, timeout int) e
 	return nil
 }
 
-func (client *InstanceClient) ActionImage(id string, name string, visibility string) (*api.Image, error) {
+func (client *InstanceClient) ActionImage(id string, name string) (*api.Image, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
 	type createBody struct {
-		Name       string `json:"name"`
-		Visibility string `json:"visibility"`
+		Name string `json:"name"`
 	}
 
-	body := createBody{Name: name, Visibility: visibility}
+	body := createBody{Name: name}
 	jsonBody, _ := json.Marshal(body)
 
 	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+fmt.Sprintf("/v1/instances/%s/action/image", id), "application/json", bytes.NewBuffer(jsonBody))

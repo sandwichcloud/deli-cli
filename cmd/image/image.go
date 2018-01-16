@@ -2,6 +2,7 @@ package image
 
 import (
 	"github.com/sandwichcloud/deli-cli/cmd"
+	"github.com/sandwichcloud/deli-cli/cmd/image/action"
 	"github.com/sandwichcloud/deli-cli/cmd/image/member"
 )
 
@@ -33,5 +34,10 @@ func (c *Command) Register(app *cmd.Application) {
 	deleteCommand.Register(command)
 
 	memberCommand := member.Command{Raw: raw}
+	memberCommand.Application = c.Application
 	memberCommand.Register(command)
+
+	visibilityCommand := action.VisibilityCommand{Raw: raw}
+	visibilityCommand.Application = c.Application
+	visibilityCommand.Register(command)
 }

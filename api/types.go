@@ -80,7 +80,7 @@ type Image struct {
 	ProjectID    uuid.UUID `json:"project_id"`
 	Name         string    `json:"name"`
 	FileName     string    `json:"file_name"`
-	Visibility   string    `json:"visibility"`
+	Public       bool      `json:"public"`
 	Locked       bool      `json:"locked"`
 	RegionID     uuid.UUID `json:"region_id"`
 	State        string    `json:"state"`

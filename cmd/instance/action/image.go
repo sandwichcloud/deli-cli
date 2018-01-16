@@ -16,14 +16,12 @@ type ImageCommand struct {
 	Raw        *bool
 	instanceID *string
 	name       *string
-	visibility *string
 }
 
 func (c *ImageCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("image", "Convert an instance to an image.").Action(c.action)
 	c.instanceID = command.Arg("instance ID", "The instance ID").Required().String()
 	c.name = command.Flag("name", "The image name").Required().String()
-	c.visibility = command.Flag("visibility", "The visibility state of the image (PUBLIC, SHARED, PRIVATE)").Default("PRIVATE").Enum("PUBLIC", "SHARED", "PRIVATE")
 }
 
 func (c *ImageCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -35,7 +33,7 @@ func (c *ImageCommand) action(app *kingpin.Application, element *kingpin.ParseEl
 	if err != nil {
 		return err
 	}
-	image, err := c.Application.APIClient.Instance().ActionImage(*c.instanceID, *c.name, *c.visibility)
+	image, err := c.Application.APIClient.Instance().ActionImage(*c.instanceID, *c.name)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.Raw {
 			err = errors.New(apiError.ToRawJSON())

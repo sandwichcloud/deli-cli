@@ -14,10 +14,9 @@ import (
 
 type importCommand struct {
 	cmd.Command
-	name       *string
-	regionID   *string
-	fileName   *string
-	visibility *string
+	name     *string
+	regionID *string
+	fileName *string
 }
 
 func (c *importCommand) Register(cmd *kingpin.CmdClause) {
@@ -25,7 +24,6 @@ func (c *importCommand) Register(cmd *kingpin.CmdClause) {
 	c.name = command.Arg("name", "The image name").Required().String()
 	c.regionID = command.Flag("region-id", "The region to create the image in").Required().String()
 	c.fileName = command.Arg("file name", "The image's file name").Required().String()
-	c.visibility = command.Flag("visibility", "The visibility state of the image (PUBLIC, SHARED, PRIVATE)").Default("PRIVATE").Enum("PUBLIC", "SHARED", "PRIVATE")
 }
 
 func (c *importCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -37,7 +35,7 @@ func (c *importCommand) action(app *kingpin.Application, element *kingpin.ParseE
 	if err != nil {
 		return err
 	}
-	image, err := c.Application.APIClient.Image().Create(*c.name, *c.regionID, *c.fileName, *c.visibility)
+	image, err := c.Application.APIClient.Image().Create(*c.name, *c.regionID, *c.fileName)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
 			err = errors.New(apiError.ToRawJSON())

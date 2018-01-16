@@ -90,10 +90,11 @@ type ZoneClientInterface interface {
 }
 
 type ImageClientInterface interface {
-	Create(name, regionID, fileName, visibility string) (*api.Image, error)
+	Create(name, regionID, fileName string) (*api.Image, error)
 	Get(id string) (*api.Image, error)
 	Delete(id string) error
 	List(visibility string, limit int, marker string) (*api.ImageList, error)
+	ActionSetVisibility(id string, public bool) error
 	ActionLock(id string) error
 	ActionUnlock(id string) error
 	MemberAdd(id, projectID string) error
@@ -129,7 +130,7 @@ type InstanceClientInterface interface {
 	ActionStop(id string, hard bool, timeout int) error
 	ActionStart(id string) error
 	ActionRestart(id string, hard bool, timeout int) error
-	ActionImage(id string, name string, visibility string) (*api.Image, error)
+	ActionImage(id string, name string) (*api.Image, error)
 	ActionResetState(id string, active bool) error
 }
 
