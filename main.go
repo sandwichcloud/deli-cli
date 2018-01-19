@@ -14,6 +14,7 @@ import (
 	"github.com/sandwichcloud/deli-cli/cmd/region"
 	"github.com/sandwichcloud/deli-cli/cmd/role"
 	"github.com/sandwichcloud/deli-cli/cmd/serviceAccount"
+	"github.com/sandwichcloud/deli-cli/cmd/volume"
 	"github.com/sandwichcloud/deli-cli/cmd/zone"
 )
 
@@ -36,6 +37,9 @@ func main() {
 
 	flavorCommand := flavor.Command{}
 	flavorCommand.Register(app)
+
+	volumeCommand := volume.Command{}
+	volumeCommand.Register(app)
 
 	imageCommand := image.Command{}
 	imageCommand.Register(app)

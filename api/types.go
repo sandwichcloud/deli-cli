@@ -75,6 +75,23 @@ type ZoneList struct {
 	Zones []Zone      `json:"zones"`
 }
 
+type Volume struct {
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	ZoneID       uuid.UUID `json:"zone_id"`
+	Size         int       `json:"size"`
+	AttachedTo   uuid.UUID `json:"attached_to"`
+	Task         string    `json:"task"`
+	State        string    `json:"state"`
+	ErrorMessage string    `json:"error_message"`
+	CreatedAt    time.Time `json:"created_at"`
+}
+
+type VolumeList struct {
+	Links   []pageLinks `json:"volumes_links"`
+	Volumes []Volume    `json:"volumes"`
+}
+
 type Image struct {
 	ID           uuid.UUID `json:"id"`
 	ProjectID    uuid.UUID `json:"project_id"`

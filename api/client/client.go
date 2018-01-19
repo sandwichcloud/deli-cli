@@ -20,6 +20,7 @@ import (
 	"github.com/sandwichcloud/deli-cli/api/client/region"
 	"github.com/sandwichcloud/deli-cli/api/client/role"
 	"github.com/sandwichcloud/deli-cli/api/client/serviceAccount"
+	"github.com/sandwichcloud/deli-cli/api/client/volume"
 	"github.com/sandwichcloud/deli-cli/api/client/zone"
 	"golang.org/x/oauth2"
 )
@@ -41,6 +42,7 @@ type ClientInterface interface {
 	NetworkPort() NetworkPortClientInterface
 	Keypair() KeypairClientInterface
 	Flavor() FlavorClientInterface
+	Volume() VolumeClientInterface
 	Instance() InstanceClientInterface
 	Policy() PolicyClientInterface
 	Role() RoleClientInterface
@@ -87,6 +89,17 @@ type ZoneClientInterface interface {
 	Delete(id string) error
 	List(regionID string, limit int, marker string) (*api.ZoneList, error)
 	ActionSchedule(id string, schedulable bool) error
+}
+
+type VolumeClientInterface interface {
+	Create(name, zoneID string, size int) (*api.Volume, error)
+	Get(id string) (*api.Volume, error)
+	Delete(id string) error
+	List(limit int, marker string) (*api.VolumeList, error)
+	ActionAttach(id, instanceID string) error
+	ActionDetach(id string) error
+	ActionGrow(id string, newSize int) error
+	ActionClone(id, name string) (*api.Volume, error)
 }
 
 type ImageClientInterface interface {
@@ -189,6 +202,10 @@ func (client *SandwichClient) Region() RegionClientInterface {
 
 func (client *SandwichClient) Zone() ZoneClientInterface {
 	return &zone.ZoneClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient()}
+}
+
+func (client *SandwichClient) Volume() VolumeClientInterface {
+	return &volume.VolumeClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient()}
 }
 
 func (client *SandwichClient) Image() ImageClientInterface {
