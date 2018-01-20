@@ -130,7 +130,7 @@ func (projectClient *ProjectClient) List(all bool, limit int, marker string) (*a
 	defer cancel()
 	parameters := url.Values{}
 
-	//parameters.Add("all", strconv.FormatBool(all))
+	parameters.Add("all", strconv.FormatBool(all))
 	parameters.Add("limit", strconv.FormatInt(int64(limit), 10))
 
 	if len(marker) > 0 {
