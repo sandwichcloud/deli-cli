@@ -73,6 +73,13 @@ type ProjectClientInterface interface {
 	Get(id string) (*api.Project, error)
 	Delete(id string) error
 	List(all bool, limit int, marker string) (*api.ProjectList, error)
+	GetQuota() (*api.ProjectQuota, error)
+	SetQuota(vcpu, ram, disk int) error
+	AddMember(username, driver string) (*api.ProjectMember, error)
+	GetMember(id string) (*api.ProjectMember, error)
+	ListMembers(limit int, marker string) (*api.ProjectMemberList, error)
+	UpdateMember(id string, roles []string) error
+	RemoveMember(id string) error
 }
 
 type RegionClientInterface interface {

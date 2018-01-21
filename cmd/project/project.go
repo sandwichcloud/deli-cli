@@ -1,6 +1,10 @@
 package project
 
-import "github.com/sandwichcloud/deli-cli/cmd"
+import (
+	"github.com/sandwichcloud/deli-cli/cmd"
+	"github.com/sandwichcloud/deli-cli/cmd/project/member"
+	"github.com/sandwichcloud/deli-cli/cmd/project/quota"
+)
 
 type Command struct {
 	cmd.Command
@@ -28,4 +32,11 @@ func (c *Command) Register(app *cmd.Application) {
 	deleteCommand.Application = c.Application
 	deleteCommand.Register(command)
 
+	memberCommand := member.Command{Raw: c.raw}
+	memberCommand.Application = c.Application
+	memberCommand.Register(command)
+
+	quotaCommand := quota.Command{Raw: c.raw}
+	quotaCommand.Application = c.Application
+	quotaCommand.Register(command)
 }

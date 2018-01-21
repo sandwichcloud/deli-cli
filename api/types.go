@@ -38,6 +38,27 @@ type ProjectList struct {
 	Projects []Project   `json:"projects"`
 }
 
+type ProjectQuota struct {
+	VCPU     int `json:"vcpu"`
+	Ram      int `json:"ram"`
+	Disk     int `json:"disk"`
+	UsedVCPU int `json:"used_vcpu"`
+	UsedRam  int `json:"used_ram"`
+	UsedDisk int `json:"used_disk"`
+}
+
+type ProjectMember struct {
+	ID       uuid.UUID `json:"id"`
+	Username string    `json:"username"`
+	Driver   string    `json:"driver"`
+	Roles    []string  `json:"roles"`
+}
+
+type ProjectMemberList struct {
+	Links           []pageLinks     `json:"project-members_links"`
+	ProjectMemberss []ProjectMember `json:"project-members"`
+}
+
 type Region struct {
 	ID             uuid.UUID `json:"id"`
 	Name           string    `json:"name"`
