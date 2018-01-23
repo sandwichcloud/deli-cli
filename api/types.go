@@ -235,10 +235,9 @@ type InstanceList struct {
 }
 
 type Policy struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"created_at"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Tags        []string `json:"tags"`
 }
 
 type PolicyList struct {
@@ -247,16 +246,20 @@ type PolicyList struct {
 }
 
 type Role struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	ProjectID   string    `json:"project_id"`
-	CreatedAt   time.Time `json:"created_at"`
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Policies  []string  `json:"policies"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
-type RoleList struct {
-	Links []pageLinks `json:"roles_links"`
-	Roles []Role      `json:"roles"`
+type GlobalRoleList struct {
+	Links []pageLinks `json:"global-roles_links"`
+	Roles []Role      `json:"global-roles"`
+}
+
+type ProjectRoleList struct {
+	Links []pageLinks `json:"project-roles_links"`
+	Roles []Role      `json:"project-roles"`
 }
 
 type ServiceAccount struct {

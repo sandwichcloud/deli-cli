@@ -45,7 +45,8 @@ type ClientInterface interface {
 	Volume() VolumeClientInterface
 	Instance() InstanceClientInterface
 	Policy() PolicyClientInterface
-	Role() RoleClientInterface
+	GlobalRole() RoleClientInterface
+	ProjectRole() RoleClientInterface
 	ServiceAccount() ServiceAccountClientInterface
 	SetToken(token *oauth2.Token)
 }
@@ -162,15 +163,17 @@ type NetworkClientInterface interface {
 }
 
 type PolicyClientInterface interface {
-	Get(id string) (*api.Policy, error)
+	Get(name string) (*api.Policy, error)
 	List(limit int, marker string) (*api.PolicyList, error)
 }
 
 type RoleClientInterface interface {
-	Create(name, roleType, description string) (*api.Role, error)
+	Create(name string, policies []string) (*api.Role, error)
 	Get(id string) (*api.Role, error)
+	GlobalList(limit int, marker string) (*api.GlobalRoleList, error)
+	ProjectList(limit int, marker string) (*api.ProjectRoleList, error)
+	Update(id string, add []string, remove []string) error
 	Delete(id string) error
-	List(roleType string, limit int, marker string) (*api.RoleList, error)
 }
 
 type ServiceAccountClientInterface interface {
@@ -243,8 +246,12 @@ func (client *SandwichClient) Policy() PolicyClientInterface {
 	return &policy.PolicyClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient()}
 }
 
-func (client *SandwichClient) Role() RoleClientInterface {
-	return &role.RoleClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient()}
+func (client *SandwichClient) GlobalRole() RoleClientInterface {
+	return &role.RoleClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient(), Type: "global-roles"}
+}
+
+func (client *SandwichClient) ProjectRole() RoleClientInterface {
+	return &role.RoleClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient(), Type: "project-roles"}
 }
 
 func (client *SandwichClient) ServiceAccount() ServiceAccountClientInterface {

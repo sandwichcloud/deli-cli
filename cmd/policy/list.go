@@ -51,7 +51,7 @@ func (c *listCommand) action(app *kingpin.Application, element *kingpin.ParseEle
 			fmt.Println(string(policiesBytes))
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Name", "ID"})
+			table.SetHeader([]string{"Name", "Description"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
 			if len(policies.Links) == 1 {
 				nextPage := policies.Links[0]
@@ -60,7 +60,7 @@ func (c *listCommand) action(app *kingpin.Application, element *kingpin.ParseEle
 			}
 
 			for _, policy := range policies.Policies {
-				table.Append([]string{policy.Name, policy.ID.String()})
+				table.Append([]string{policy.Name, policy.Description})
 			}
 
 			table.Render()

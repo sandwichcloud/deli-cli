@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 
 	"os"
 
@@ -17,13 +18,13 @@ import (
 
 type inspectCommand struct {
 	cmd.Command
-	regionID *string
-	raw      *bool
+	policyName *string
+	raw        *bool
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("inspect", "Inspect a policy").Action(c.action)
-	c.regionID = command.Arg("policyID", "The policy ID").Required().String()
+	c.policyName = command.Arg("policy name", "The policy name").Required().String()
 }
 
 func (c *inspectCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -35,7 +36,7 @@ func (c *inspectCommand) action(app *kingpin.Application, element *kingpin.Parse
 	if err != nil {
 		return err
 	}
-	policy, err := c.Application.APIClient.Policy().Get(*c.regionID)
+	policy, err := c.Application.APIClient.Policy().Get(*c.policyName)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -49,9 +50,17 @@ func (c *inspectCommand) action(app *kingpin.Application, element *kingpin.Parse
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Property", "Value"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
+			table.SetAutoMergeCells(true)
 
 			for _, field := range structs.Fields(policy) {
-				table.Append([]string{field.Tag("json"), utils.InterfaceToString(field.Value())})
+				if field.Kind() == reflect.Slice {
+					v := reflect.ValueOf(field.Value())
+					for i := 0; i < v.Len(); i++ {
+						table.Append([]string{field.Tag("json"), utils.InterfaceToString(v.Index(i))})
+					}
+				} else {
+					table.Append([]string{field.Tag("json"), utils.InterfaceToString(field.Value())})
+				}
 			}
 			table.Render()
 		}

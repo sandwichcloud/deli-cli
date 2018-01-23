@@ -17,11 +17,11 @@ type PolicyClient struct {
 	HttpClient *http.Client
 }
 
-func (client *PolicyClient) Get(id string) (*api.Policy, error) {
+func (client *PolicyClient) Get(name string) (*api.Policy, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
-	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/v1/auth/z/policies/"+id)
+	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/v1/auth/policies/"+name)
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -59,7 +59,7 @@ func (client *PolicyClient) List(limit int, marker string) (*api.PolicyList, err
 		parameters.Add("marker", marker)
 	}
 
-	Url, err := url.Parse(*client.APIServer + "/v1/auth/z/policies")
+	Url, err := url.Parse(*client.APIServer + "/v1/auth/policies")
 	if err != nil {
 		return nil, err
 	}
