@@ -172,7 +172,7 @@ type RoleClientInterface interface {
 	Get(id string) (*api.Role, error)
 	GlobalList(limit int, marker string) (*api.GlobalRoleList, error)
 	ProjectList(limit int, marker string) (*api.ProjectRoleList, error)
-	Update(id string, add []string, remove []string) error
+	Update(id string, policies []string) error
 	Delete(id string) error
 }
 

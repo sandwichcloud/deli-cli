@@ -214,16 +214,15 @@ func (client *RoleClient) ProjectList(limit int, marker string) (*api.ProjectRol
 	return roles, nil
 }
 
-func (client *RoleClient) Update(id string, add []string, remove []string) error {
+func (client *RoleClient) Update(id string, policies []string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
 	type updateRoleBody struct {
-		Add    []string `json:"add"`
-		Remove []string `json:"remove"`
+		Policies []string `json:"policies"`
 	}
 
-	body := updateRoleBody{Add: add, Remove: remove}
+	body := updateRoleBody{Policies: policies}
 	jsonBody, _ := json.Marshal(body)
 
 	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/v1/auth/"+client.Type+"/"+id, "application/json", bytes.NewBuffer(jsonBody))

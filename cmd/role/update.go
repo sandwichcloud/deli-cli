@@ -12,18 +12,16 @@ import (
 
 type updateCommand struct {
 	cmd.Command
-	project bool
-	raw     *bool
-	roleID  *string
-	add     *[]string
-	remove  *[]string
+	project  bool
+	raw      *bool
+	roleID   *string
+	policies *[]string
 }
 
 func (c *updateCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("update", "Update a role").Action(c.action)
 	c.roleID = command.Arg("role ID", "The role ID").String()
-	c.add = command.Flag("add", "Policy to add").Strings()
-	c.remove = command.Flag("remove", "Policy to remove").Strings()
+	c.policies = command.Flag("policy", "The policy to give the role").Required().Strings()
 }
 
 func (c *updateCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -39,18 +37,10 @@ func (c *updateCommand) action(app *kingpin.Application, element *kingpin.ParseE
 	if err != nil {
 		return err
 	}
-	add := make([]string, 0)
-	remove := make([]string, 0)
-	if *c.add != nil {
-		add = *c.add
-	}
-	if *c.remove != nil {
-		remove = *c.remove
-	}
 	if c.project {
-		err = c.Application.APIClient.ProjectRole().Update(*c.roleID, add, remove)
+		err = c.Application.APIClient.ProjectRole().Update(*c.roleID, *c.policies)
 	} else {
-		err = c.Application.APIClient.GlobalRole().Update(*c.roleID, add, remove)
+		err = c.Application.APIClient.GlobalRole().Update(*c.roleID, *c.policies)
 	}
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
