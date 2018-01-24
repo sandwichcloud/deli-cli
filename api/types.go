@@ -55,8 +55,8 @@ type ProjectMember struct {
 }
 
 type ProjectMemberList struct {
-	Links           []pageLinks     `json:"project-members_links"`
-	ProjectMemberss []ProjectMember `json:"project-members"`
+	Links          []pageLinks     `json:"project-members_links"`
+	ProjectMembers []ProjectMember `json:"project-members"`
 }
 
 type Region struct {

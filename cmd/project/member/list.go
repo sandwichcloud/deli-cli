@@ -55,7 +55,7 @@ func (c *listCommand) action(app *kingpin.Application, element *kingpin.ParseEle
 				table.SetCaption(true, fmt.Sprintf("Next Page Marker %s", nextPageUrl.Query().Get("marker")))
 			}
 
-			for _, projectMember := range projectMembers.ProjectMemberss {
+			for _, projectMember := range projectMembers.ProjectMembers {
 				table.Append([]string{projectMember.Username, projectMember.Driver, projectMember.ID.String()})
 			}
 
