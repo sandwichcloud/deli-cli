@@ -22,7 +22,7 @@ func (c *RestartCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("restart", "Restart an instance").Action(c.action)
 	c.instanceID = command.Arg("instance ID", "The instance ID").Required().String()
 	c.hard = command.Flag("hard", "Hard stop the instance").Default("false").Bool()
-	c.timeout = command.Flag("timeout", "Timeout until the instance is force stopped").Default("60").Int()
+	c.timeout = command.Flag("timeout", "Time in seconds until the instance is hard stopped").Default("60").Int()
 }
 
 func (c *RestartCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {

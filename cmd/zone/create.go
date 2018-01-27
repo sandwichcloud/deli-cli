@@ -29,10 +29,10 @@ func (c *createCommand) Register(cmd *kingpin.CmdClause) {
 	c.name = command.Arg("name", "The zone name").Required().String()
 	c.regionID = command.Flag("region-id", "The region this zone belongs to").Required().String()
 	c.vmCluster = command.Flag("vm-cluster", "The VMware cluster for this zone").Required().String()
-	c.vmDatastore = command.Flag("vm-datastore", "The VMWare datastore for this cluster").Required().String()
-	c.vmFolder = command.Flag("vm-folder", "The VMWare VM & Templates folder to keep vms in").String()
-	c.coreProvisionPercent = command.Flag("core-provision-percent", "The percentage of cores to provision from the VMWare cluster").Default("1600").Int()
-	c.ramProvisionPercent = command.Flag("ram-provision-percent", "The percentage of ram to provision from the VMWare cluster").Default("150").Int()
+	c.vmDatastore = command.Flag("vm-datastore", "The VMware datastore for this zone").Required().String()
+	c.vmFolder = command.Flag("vm-folder", "The VMware VM & Templates folder to keep vms in").String()
+	c.coreProvisionPercent = command.Flag("core-provision-percent", "The percentage of cores to provision from the VMware cluster").Default("1600").Int()
+	c.ramProvisionPercent = command.Flag("ram-provision-percent", "The percentage of ram to provision from the VMware cluster").Default("150").Int()
 
 }
 

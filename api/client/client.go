@@ -65,8 +65,7 @@ type DatabaseAuthClientInterface interface {
 	Delete(id string) error
 	List(limit int, marker string) (*api.DatabaseUserList, error)
 	ChangePassword(id, password string) error
-	AddRole(id, role string) error
-	RemoveRole(id, role string) error
+	UpdateRoles(id string, roles []string) error
 }
 
 type ProjectClientInterface interface {
@@ -152,7 +151,6 @@ type InstanceClientInterface interface {
 	ActionStart(id string) error
 	ActionRestart(id string, hard bool, timeout int) error
 	ActionImage(id string, name string) (*api.Image, error)
-	ActionResetState(id string, active bool) error
 }
 
 type NetworkClientInterface interface {
@@ -177,10 +175,11 @@ type RoleClientInterface interface {
 }
 
 type ServiceAccountClientInterface interface {
-	Create(name, roleId string) (*api.ServiceAccount, error)
+	Create(name string) (*api.ServiceAccount, error)
 	Get(id string) (*api.ServiceAccount, error)
 	Delete(id string) error
 	List(limit int, marker string) (*api.ServiceAccountList, error)
+	Update(id string, roles []string) error
 }
 
 func (client *SandwichClient) createOAuthClient() *http.Client {

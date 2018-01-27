@@ -1,15 +1,11 @@
-package network
+package serviceAccount
 
 import (
 	"encoding/json"
-
-	"net/url"
-
-	"os"
-
-	"fmt"
-
 	"errors"
+	"fmt"
+	"net/url"
+	"os"
 
 	"github.com/alecthomas/kingpin"
 	"github.com/olekukonko/tablewriter"
@@ -19,17 +15,14 @@ import (
 
 type listCommand struct {
 	cmd.Command
-	name     *string
-	regionID *string
-	limit    *int
-	marker   *string
+	raw    *bool
+	limit  *int
+	marker *string
 }
 
 func (c *listCommand) Register(cmd *kingpin.CmdClause) {
-	command := cmd.Command("list", "List networks").Action(c.action)
-	c.name = command.Flag("name", "The name to filter by").Default("").String()
-	c.regionID = command.Flag("regionID", "The region to filter by").Default("").String()
-	c.limit = command.Flag("limit", "Number of projects to show per page").Default("20").Int()
+	command := cmd.Command("list", "List service accounts").Action(c.action)
+	c.limit = command.Flag("limit", "Number of instances to show per page").Default("20").Int()
 	c.marker = command.Flag("marker", "Marker Token for the next page of results").String()
 }
 
@@ -38,32 +31,32 @@ func (c *listCommand) action(app *kingpin.Application, element *kingpin.ParseEle
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetUnScopedToken()
+	err = c.Application.SetScopedToken()
 	if err != nil {
 		return err
 	}
-	networks, err := c.Application.APIClient.Network().List(*c.name, *c.regionID, *c.limit, *c.marker)
+	serviceAccounts, err := c.Application.APIClient.ServiceAccount().List(*c.limit, *c.marker)
 	if err != nil {
-		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
+		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
 		}
 		return err
 	} else {
-		if *raw {
-			imageBytes, _ := json.MarshalIndent(networks, "", "  ")
-			fmt.Println(string(imageBytes))
+		if *c.raw {
+			serviceAccountsBytes, _ := json.MarshalIndent(serviceAccounts, "", "  ")
+			fmt.Println(string(serviceAccountsBytes))
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Name", "ID"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
-			if len(networks.Links) == 1 {
-				nextPage := networks.Links[0]
+			if len(serviceAccounts.Links) == 1 {
+				nextPage := serviceAccounts.Links[0]
 				nextPageUrl, _ := url.Parse(nextPage.HREF)
 				table.SetCaption(true, fmt.Sprintf("Next Page Marker %s", nextPageUrl.Query().Get("marker")))
 			}
 
-			for _, network := range networks.Networks {
-				table.Append([]string{network.Name, network.ID.String()})
+			for _, serviceAccount := range serviceAccounts.ServiceAccounts {
+				table.Append([]string{serviceAccount.Name, serviceAccount.ID.String()})
 			}
 
 			table.Render()

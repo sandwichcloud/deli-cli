@@ -47,7 +47,4 @@ func (c *Command) Register(app *cmd.Application) {
 	actionStop.Application = c.Application
 	actionStop.Register(command)
 
-	actionResetState := action.ResetStateCommand{Raw: c.raw}
-	actionResetState.Application = c.Application
-	actionResetState.Register(command)
 }

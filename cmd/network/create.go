@@ -34,7 +34,7 @@ func (c *createCommand) Register(cmd *kingpin.CmdClause) {
 	c.gateway = command.Flag("gateway", "The network gateway").Required().IP()
 	c.dnsServers = command.Flag("dns-server", "DNS Servers for the network").Required().IPList()
 	c.poolStart = command.Flag("pool-start", "The address for the start of the IP pool").Required().IP()
-	c.poolEnd = command.Flag("pool-end", "The address for the end of the IP poool").Required().IP()
+	c.poolEnd = command.Flag("pool-end", "The address for the end of the IP pool").Required().IP()
 }
 
 func (c *createCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {

@@ -22,7 +22,7 @@ func (c *StopCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("stop", "Stop an instance").Action(c.action)
 	c.instanceID = command.Arg("instance ID", "The instance ID").Required().String()
 	c.hard = command.Flag("hard", "Hard stop the instance").Default("false").Bool()
-	c.timeout = command.Flag("timeout", "Timeout until the instance is force stopped").Default("60").Int()
+	c.timeout = command.Flag("timeout", "Time in seconds until the instance is hard stopped").Default("60").Int()
 }
 
 func (c *StopCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {

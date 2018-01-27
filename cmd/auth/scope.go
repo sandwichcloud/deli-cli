@@ -18,7 +18,7 @@ type scopeCommand struct {
 }
 
 func (c *scopeCommand) Register(cmd *kingpin.CmdClause) {
-	command := cmd.Command("scope", "Login to the Sandwich Cloud API").Action(c.action)
+	command := cmd.Command("scope", "Scope the current auth token to a project").Action(c.action)
 	c.projectID = command.Arg("project ID", "The project ID to scope to").Required().String()
 }
 

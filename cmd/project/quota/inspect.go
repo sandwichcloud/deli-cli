@@ -21,7 +21,7 @@ type inspectCommand struct {
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
-	cmd.Command("inspect", "Inspect a projects quota").Action(c.action)
+	cmd.Command("inspect", "Inspect a project's quota").Action(c.action)
 }
 
 func (c *inspectCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {

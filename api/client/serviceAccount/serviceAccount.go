@@ -18,16 +18,15 @@ type ServiceAccountClient struct {
 	HttpClient *http.Client
 }
 
-func (client *ServiceAccountClient) Create(name, roleId string) (*api.ServiceAccount, error) {
+func (client *ServiceAccountClient) Create(name string) (*api.ServiceAccount, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
 	type createBody struct {
-		Name   string `json:"name"`
-		RoleID string `json:"role_id"`
+		Name string `json:"name"`
 	}
 
-	body := createBody{Name: name, RoleID: roleId}
+	body := createBody{Name: name}
 	jsonBody, _ := json.Marshal(body)
 
 	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/v1/service-accounts", "application/json", bytes.NewBuffer(jsonBody))
@@ -167,4 +166,40 @@ func (client *ServiceAccountClient) List(limit int, marker string) (*api.Service
 	serviceAccounts := &api.ServiceAccountList{}
 	json.Unmarshal(responseData, serviceAccounts)
 	return serviceAccounts, nil
+}
+
+func (client *ServiceAccountClient) Update(id string, roles []string) error {
+	ctx, cancel := api.CreateTimeoutContext()
+	defer cancel()
+
+	type updateBody struct {
+		Roles []string `json:"roles"`
+	}
+
+	body := updateBody{Roles: roles}
+	jsonBody, _ := json.Marshal(body)
+
+	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/v1/service-accounts/"+id, "application/json", bytes.NewBuffer(jsonBody))
+	if err != nil {
+		if err == context.DeadlineExceeded {
+			return api.ErrTimedOut
+		}
+		return err
+	}
+
+	responseData, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return err
+	}
+	response.Body.Close()
+
+	if response.StatusCode != http.StatusNoContent {
+		apiError, err := api.ParseErrors(response.StatusCode, responseData)
+		if err != nil {
+			return err
+		}
+		return apiError
+	}
+
+	return nil
 }

@@ -19,7 +19,7 @@ type ImageCommand struct {
 }
 
 func (c *ImageCommand) Register(cmd *kingpin.CmdClause) {
-	command := cmd.Command("image", "Convert an instance to an image.").Action(c.action)
+	command := cmd.Command("image", "Create an image from an instance").Action(c.action)
 	c.instanceID = command.Arg("instance ID", "The instance ID").Required().String()
 	c.name = command.Flag("name", "The image name").Required().String()
 }

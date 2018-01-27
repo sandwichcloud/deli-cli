@@ -48,10 +48,11 @@ type ProjectQuota struct {
 }
 
 type ProjectMember struct {
-	ID       uuid.UUID `json:"id"`
-	Username string    `json:"username"`
-	Driver   string    `json:"driver"`
-	Roles    []string  `json:"roles"`
+	ID        uuid.UUID `json:"id"`
+	Username  string    `json:"username"`
+	Driver    string    `json:"driver"`
+	Roles     []string  `json:"roles"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type ProjectMemberList struct {
@@ -265,8 +266,7 @@ type ProjectRoleList struct {
 type ServiceAccount struct {
 	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
-	RoleID    string    `json:"role_id"`
-	ProjectID string    `json:"project_id"`
+	Roles     []string  `json:"roles"`
 	CreatedAt time.Time `json:"created_at"`
 }
 

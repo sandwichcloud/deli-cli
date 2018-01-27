@@ -26,7 +26,7 @@ type listCommand struct {
 
 func (c *listCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("list", "List images").Action(c.action)
-	c.visibility = command.Flag("visibility", "The visibility state to filter by (PUBLIC, SHARED, PRIVATE)").Default("PRIVATE").Enum("PUBLIC", "SHARED", "PRIVATE")
+	c.visibility = command.Flag("visibility", "The visibility state to filter by (PUBLIC, PRIVATE)").Default("PRIVATE").Enum("PUBLIC", "PRIVATE")
 	c.limit = command.Flag("limit", "Number of projects to show per page").Default("20").Int()
 	c.marker = command.Flag("marker", "Marker Token for the next page of results").String()
 }

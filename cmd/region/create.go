@@ -24,9 +24,9 @@ type createCommand struct {
 func (c *createCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("create", "Create a region").Action(c.action)
 	c.name = command.Arg("name", "The region name").Required().String()
-	c.datacenter = command.Flag("datacenter", "The VMWare Datacenter for this region.").Required().String()
-	c.imageDatastore = command.Flag("image-datastore", "The VMWare Datastore to keep images in").Required().String()
-	c.imageFolder = command.Flag("image-folder", "The VMWare VM & Templates folder to keep images in").String()
+	c.datacenter = command.Flag("datacenter", "The VMware Datacenter for the region.").Required().String()
+	c.imageDatastore = command.Flag("image-datastore", "The VMware Datastore to keep images in").Required().String()
+	c.imageFolder = command.Flag("image-folder", "The VMware VM & Templates folder to keep images in").String()
 }
 
 func (c *createCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {

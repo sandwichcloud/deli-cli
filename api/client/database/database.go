@@ -220,79 +220,24 @@ func (client *DatabaseAuthClient) ChangePassword(id, password string) error {
 	return nil
 }
 
-func (client *DatabaseAuthClient) AddRole(id, role string) error {
+func (client *DatabaseAuthClient) UpdateRoles(id string, roles []string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
-	Url, err := url.Parse(*client.APIServer + "/v1/auth/database/users/" + id + "/role/add")
-	if err != nil {
-		return err
-	}
 
 	type roleBody struct {
-		Role string `json:"role"`
+		Roles []string `json:"roles"`
 	}
 
-	body := roleBody{Role: role}
+	body := roleBody{Roles: roles}
 	jsonBody, _ := json.Marshal(body)
 
-	req, err := http.NewRequest("PUT", Url.String(), bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	response, err := ctxhttp.Do(ctx, client.HttpClient, req)
+	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/v1/auth/database/users/"+id+"/roles/update", "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return api.ErrTimedOut
 		}
 		return err
 	}
-
-	responseData, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-	response.Body.Close()
-
-	if response.StatusCode != http.StatusNoContent {
-		apiError, err := api.ParseErrors(response.StatusCode, responseData)
-		if err != nil {
-			return err
-		}
-		return apiError
-	}
-
-	return nil
-}
-
-func (client *DatabaseAuthClient) RemoveRole(id, role string) error {
-	ctx, cancel := api.CreateTimeoutContext()
-	defer cancel()
-	Url, err := url.Parse(*client.APIServer + "/v1/auth/database/users/" + id + "/role/remove")
-	if err != nil {
-		return err
-	}
-
-	type roleBody struct {
-		Role string `json:"role"`
-	}
-
-	body := roleBody{Role: role}
-	jsonBody, _ := json.Marshal(body)
-
-	req, err := http.NewRequest("PUT", Url.String(), bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	response, err := ctxhttp.Do(ctx, client.HttpClient, req)
-	if err != nil {
-		if err == context.DeadlineExceeded {
-			return api.ErrTimedOut
-		}
-		return err
-	}
-
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return err

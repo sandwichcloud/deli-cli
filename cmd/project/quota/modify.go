@@ -19,7 +19,7 @@ type modifyCommand struct {
 }
 
 func (c *modifyCommand) Register(cmd *kingpin.CmdClause) {
-	command := cmd.Command("modify", "Modify a projects quota").Action(c.action)
+	command := cmd.Command("modify", "Modify a project's quota").Action(c.action)
 	c.vcpu = command.Flag("vcpu", "The number of vcpus the project is allowed to use").Default("-1").Int()
 	c.ram = command.Flag("ram", "The amount of ram (in MB) the project is allowed to use").Default("-1").Int()
 	c.disk = command.Flag("disk", "The amount of disk (in GB) the project is allowed to use").Default("-1").Int()

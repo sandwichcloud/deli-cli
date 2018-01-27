@@ -20,7 +20,7 @@ type GrowCommand struct {
 func (c *GrowCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("grow", "Increase the size of a volume.").Action(c.action)
 	c.volumeID = command.Arg("volume ID", "The volume ID").Required().String()
-	c.size = command.Arg("size", "The new size of the volume").Required().Int()
+	c.size = command.Arg("size", "The new size of the volume in gigabytes").Required().Int()
 }
 
 func (c *GrowCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {

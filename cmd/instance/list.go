@@ -27,7 +27,7 @@ type listCommand struct {
 
 func (c *listCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("list", "List instances").Action(c.action)
-	c.imageID = command.Flag("imageID", "The image ID to filter instances by").String()
+	c.imageID = command.Flag("image-id", "The image ID to filter instances by").String()
 	c.limit = command.Flag("limit", "Number of instances to show per page").Default("20").Int()
 	c.marker = command.Flag("marker", "Marker Token for the next page of results").String()
 }
