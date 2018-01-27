@@ -143,7 +143,7 @@ type FlavorClientInterface interface {
 }
 
 type InstanceClientInterface interface {
-	Create(name, imageID, regionID, zoneID, networkID, serviceAccountID string, flavorID string, disk int, keypairIDs []string, tags map[string]string) (*api.Instance, error)
+	Create(name, imageID, regionID, zoneID, networkID, serviceAccountID, flavorID string, disk int, keypairIDs []string, tags map[string]string, userData string) (*api.Instance, error)
 	Get(id string) (*api.Instance, error)
 	Delete(id string) error
 	List(imageID string, limit int, marker string) (*api.InstanceList, error)

@@ -218,6 +218,7 @@ type Instance struct {
 	ZoneID           uuid.UUID         `json:"zone_id"`
 	ServiceAccountID uuid.UUID         `json:"service_account_id"`
 	Tags             map[string]string `json:"tags"`
+	UserData         string            `json:"user_data"`
 	KeypairIDs       []uuid.UUID       `json:"keypair_ids"`
 	FlavorID         uuid.UUID         `json:"flavor_id"`
 	VCPUS            int               `json:"vcpus"`

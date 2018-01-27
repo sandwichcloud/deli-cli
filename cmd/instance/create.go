@@ -29,6 +29,7 @@ type createCommand struct {
 	disk             *int
 	keypairIDs       *[]string
 	tags             *map[string]string
+	userData         *string
 }
 
 func (c *createCommand) Register(cmd *kingpin.CmdClause) {
@@ -43,6 +44,7 @@ func (c *createCommand) Register(cmd *kingpin.CmdClause) {
 	c.disk = command.Flag("disk", "The size of the disk to create, this overrides the flavor.").Int()
 	c.keypairIDs = command.Flag("keypair-id", "An ID of a keypair to add to the instance").Strings()
 	c.tags = command.Flag("tag", "A metadata tag to add to the instance").StringMap()
+	c.userData = command.Flag("user-data", "User data to add to the instance").String()
 }
 
 func (c *createCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -67,7 +69,7 @@ func (c *createCommand) action(app *kingpin.Application, element *kingpin.ParseE
 		}
 	}
 
-	instance, err := c.Application.APIClient.Instance().Create(*c.name, *c.imageID, *c.regionID, *c.zoneID, *c.networkID, *c.serviceAccountID, *c.flavorId, *c.disk, *c.keypairIDs, tags)
+	instance, err := c.Application.APIClient.Instance().Create(*c.name, *c.imageID, *c.regionID, *c.zoneID, *c.networkID, *c.serviceAccountID, *c.flavorId, *c.disk, *c.keypairIDs, tags, *c.userData)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())

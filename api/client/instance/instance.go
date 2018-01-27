@@ -23,7 +23,7 @@ type InstanceClient struct {
 	HttpClient *http.Client
 }
 
-func (client *InstanceClient) Create(name, imageID, regionID, zoneID, networkID, serviceAccountID string, flavorID string, disk int, keypairIDs []string, tags map[string]string) (*api.Instance, error) {
+func (client *InstanceClient) Create(name, imageID, regionID, zoneID, networkID, serviceAccountID, flavorID string, disk int, keypairIDs []string, tags map[string]string, userData string) (*api.Instance, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
@@ -38,6 +38,7 @@ func (client *InstanceClient) Create(name, imageID, regionID, zoneID, networkID,
 		Disk             int               `json:"disk,omitempty"`
 		KeypairIDs       []string          `json:"keypair_ids,omitempty"`
 		Tags             map[string]string `json:"tags"`
+		UserData         string            `json:"user_data"`
 	}
 
 	body := createBody{
@@ -51,6 +52,7 @@ func (client *InstanceClient) Create(name, imageID, regionID, zoneID, networkID,
 		Disk:             disk,
 		KeypairIDs:       keypairIDs,
 		Tags:             tags,
+		UserData:         userData,
 	}
 	jsonBody, _ := json.Marshal(body)
 
