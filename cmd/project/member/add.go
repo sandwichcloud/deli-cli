@@ -24,7 +24,7 @@ func (c *addCommand) Register(cmd *kingpin.CmdClause) {
 	c.driver = command.Arg("driver", "The driver of the user to add").Required().String()
 }
 
-func (c *addCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *addCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

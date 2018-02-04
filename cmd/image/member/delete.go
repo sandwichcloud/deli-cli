@@ -24,7 +24,7 @@ func (c *removeCommand) Register(cmd *kingpin.CmdClause) {
 	c.projectID = command.Arg("project id", "The project ID to remove").Required().String()
 }
 
-func (c *removeCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *removeCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

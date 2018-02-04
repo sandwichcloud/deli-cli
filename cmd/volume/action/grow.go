@@ -23,7 +23,7 @@ func (c *GrowCommand) Register(cmd *kingpin.CmdClause) {
 	c.size = command.Arg("size", "The new size of the volume in gigabytes").Required().Int()
 }
 
-func (c *GrowCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *GrowCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

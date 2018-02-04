@@ -25,7 +25,7 @@ func (c *StopCommand) Register(cmd *kingpin.CmdClause) {
 	c.timeout = command.Flag("timeout", "Time in seconds until the instance is hard stopped").Default("60").Int()
 }
 
-func (c *StopCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *StopCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

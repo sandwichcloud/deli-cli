@@ -24,7 +24,7 @@ func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
 	cmd.Command("inspect", "Inspect a project's quota").Action(c.action)
 }
 
-func (c *inspectCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

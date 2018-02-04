@@ -16,7 +16,7 @@ func (c *userDataCommand) Register(cmd *kingpin.CmdClause) {
 	cmd.Command("user-data", "View instance user-data").Action(c.action)
 }
 
-func (c *userDataCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *userDataCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 
 	mClient := metadata.MetaDataClient{}
 	err := mClient.Connect("/dev/ttyS0")

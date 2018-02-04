@@ -20,12 +20,12 @@ func (c *deleteCommand) Register(cmd *kingpin.CmdClause) {
 	c.flavorID = command.Arg("flavor ID", "The flavor ID").Required().String()
 }
 
-func (c *deleteCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
+	err = c.Application.SetUnScopedToken()
 	if err != nil {
 		return err
 	}

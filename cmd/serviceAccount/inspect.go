@@ -26,7 +26,7 @@ func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
 	c.serviceAccountID = command.Arg("service account ID", "The service account ID").String()
 }
 
-func (c *inspectCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

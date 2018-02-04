@@ -24,7 +24,7 @@ func (c *VisibilityCommand) Register(cmd *kingpin.CmdClause) {
 	c.public = command.Flag("public", "Enable or disable public visibility of an image").Required().NegatableBool()
 }
 
-func (c *VisibilityCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *VisibilityCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

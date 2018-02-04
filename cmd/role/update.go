@@ -24,7 +24,7 @@ func (c *updateCommand) Register(cmd *kingpin.CmdClause) {
 	c.policies = command.Flag("policy", "The policy to give the role").Required().Strings()
 }
 
-func (c *updateCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *updateCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

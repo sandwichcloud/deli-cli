@@ -22,7 +22,7 @@ func (c *scopeCommand) Register(cmd *kingpin.CmdClause) {
 	c.projectID = command.Arg("project ID", "The project ID to scope to").Required().String()
 }
 
-func (c *scopeCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *scopeCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

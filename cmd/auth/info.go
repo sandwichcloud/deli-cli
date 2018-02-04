@@ -28,7 +28,7 @@ func (c *infoCommand) Register(cmd *kingpin.CmdClause) {
 	c.tokenType = command.Arg("type", "The type of token to view information from (scoped or unscoped)").Required().Enum("unscoped", "scoped")
 }
 
-func (c *infoCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *infoCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

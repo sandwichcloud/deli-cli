@@ -27,7 +27,7 @@ func (c *loginCommand) Register(cmd *kingpin.CmdClause) {
 	c.password = command.Flag("password", "User password to auth with. If not given, will prompt for input.").Short('p').String()
 }
 
-func (c *loginCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *loginCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	apiDiscover, err := c.Application.APIClient.Auth().DiscoverAuth()
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {

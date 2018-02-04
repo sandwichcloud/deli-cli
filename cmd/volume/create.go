@@ -27,7 +27,7 @@ func (c *createCommand) Register(cmd *kingpin.CmdClause) {
 	c.size = command.Flag("size", "The size of the volume in gigabytes").Required().Int()
 }
 
-func (c *createCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

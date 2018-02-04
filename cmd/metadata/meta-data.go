@@ -16,7 +16,7 @@ func (c *metaDataCommand) Register(cmd *kingpin.CmdClause) {
 	cmd.Command("meta-data", "View instance meta-data").Action(c.action)
 }
 
-func (c *metaDataCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *metaDataCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 
 	mClient := metadata.MetaDataClient{}
 	err := mClient.Connect("/dev/ttyS0")

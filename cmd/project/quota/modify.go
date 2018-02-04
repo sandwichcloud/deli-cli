@@ -25,7 +25,7 @@ func (c *modifyCommand) Register(cmd *kingpin.CmdClause) {
 	c.disk = command.Flag("disk", "The amount of disk (in GB) the project is allowed to use").Default("-1").Int()
 }
 
-func (c *modifyCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *modifyCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

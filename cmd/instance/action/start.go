@@ -21,7 +21,7 @@ func (c *StartCommand) Register(cmd *kingpin.CmdClause) {
 	c.instanceID = command.Arg("instance ID", "The instance ID").Required().String()
 }
 
-func (c *StartCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *StartCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

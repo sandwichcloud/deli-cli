@@ -29,12 +29,12 @@ func (c *listCommand) Register(cmd *kingpin.CmdClause) {
 	c.marker = command.Flag("marker", "Marker Token for the next page of results").String()
 }
 
-func (c *listCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
+	err = c.Application.SetUnScopedToken()
 	if err != nil {
 		return err
 	}

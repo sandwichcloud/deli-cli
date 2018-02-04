@@ -22,7 +22,7 @@ func (c *createCommand) Register(cmd *kingpin.CmdClause) {
 	c.name = command.Arg("name", "The service account name").Required().String()
 }
 
-func (c *createCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

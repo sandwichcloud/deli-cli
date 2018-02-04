@@ -21,7 +21,7 @@ func (c *deleteCommand) Register(cmd *kingpin.CmdClause) {
 	c.id = command.Arg("id", "The region id").Required().String()
 }
 
-func (c *deleteCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

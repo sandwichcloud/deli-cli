@@ -46,7 +46,7 @@ func (app *Application) Setup() {
 	app.APIClient = apiClient
 }
 
-func (app *Application) setupLogging(_ *kingpin.Application, _ *kingpin.ParseElement, _ *kingpin.ParseContext) error {
+func (app *Application) setupLogging(_ *kingpin.ParseElement, _ *kingpin.ParseContext) error {
 	log.SetOutput(os.Stdout)
 	log.SetFormatter(&log.TextFormatter{FullTimestamp: true})
 	log.SetLevel(log.InfoLevel)

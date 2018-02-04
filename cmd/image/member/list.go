@@ -28,7 +28,7 @@ func (c *listCommand) Register(cmd *kingpin.CmdClause) {
 	c.imageID = command.Arg("image ID", "The image ID").Required().String()
 }
 
-func (c *listCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

@@ -26,7 +26,7 @@ func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
 	c.keypairID = command.Arg("keypair ID", "The keypair ID").Required().String()
 }
 
-func (c *inspectCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

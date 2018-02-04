@@ -29,7 +29,7 @@ func (c *createCommand) Register(cmd *kingpin.CmdClause) {
 	c.imageFolder = command.Flag("image-folder", "The VMware VM & Templates folder to keep images in").String()
 }
 
-func (c *createCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

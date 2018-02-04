@@ -23,7 +23,7 @@ func (c *updateCommand) Register(cmd *kingpin.CmdClause) {
 	c.schedulable = command.Flag("schedulable", "Enable or disable the ability to schedule workloads in the zone").Required().NegatableBool()
 }
 
-func (c *updateCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *updateCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

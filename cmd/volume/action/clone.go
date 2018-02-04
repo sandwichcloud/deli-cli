@@ -24,7 +24,7 @@ func (c *CloneCommand) Register(cmd *kingpin.CmdClause) {
 	c.name = command.Arg("name", "The name of the new volume").Required().String()
 }
 
-func (c *CloneCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *CloneCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

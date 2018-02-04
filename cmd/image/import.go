@@ -26,7 +26,7 @@ func (c *importCommand) Register(cmd *kingpin.CmdClause) {
 	c.fileName = command.Arg("file name", "The image's file name").Required().String()
 }
 
-func (c *importCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *importCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

@@ -36,7 +36,7 @@ func (c *generateCommand) Register(cmd *kingpin.CmdClause) {
 	c.keyPath = command.Flag("key-dir", "Directory to save the keypair to").Default("~/.ssh").String()
 }
 
-func (c *generateCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *generateCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

@@ -22,7 +22,7 @@ func (c *deleteCommand) Register(cmd *kingpin.CmdClause) {
 	c.roleID = command.Arg("role ID", "The role ID").String()
 }
 
-func (c *deleteCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err

@@ -16,7 +16,7 @@ func (c *networkDataCommand) Register(cmd *kingpin.CmdClause) {
 	cmd.Command("network-data", "View instance network-data").Action(c.action)
 }
 
-func (c *networkDataCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *networkDataCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 
 	mClient := metadata.MetaDataClient{}
 	err := mClient.Connect("/dev/ttyS0")

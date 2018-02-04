@@ -26,7 +26,7 @@ func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
 	c.portID = command.Arg("network port ID", "The network port ID").Required().String()
 }
 
-func (c *inspectCommand) action(app *kingpin.Application, element *kingpin.ParseElement, context *kingpin.ParseContext) error {
+func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
 	if err != nil {
 		return err
