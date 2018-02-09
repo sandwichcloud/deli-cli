@@ -66,8 +66,7 @@ func (apiError APIError) Error() string {
 	var errorStrings []string
 	for _, dataError := range apiError.Errors {
 		if dataError.Source.Pointer != "" {
-			pointerPath := strings.Split(dataError.Source.Pointer, "/")
-			pointer := pointerPath[len(pointerPath)-1]
+			pointer := strings.Replace(dataError.Source.Pointer, "/data/attributes/", "", 1)
 			errorStrings = append(errorStrings, pointer+": "+dataError.Detail)
 		} else {
 			errorStrings = append(errorStrings, dataError.Source.Parameter+": "+dataError.Detail)

@@ -231,6 +231,11 @@ type Instance struct {
 	CreatedAt        time.Time         `json:"created_at"`
 }
 
+type InstanceInitialVolume struct {
+	Size       int  `json:"size"`
+	AutoDelete bool `json:"auto_delete"`
+}
+
 type InstanceList struct {
 	Links     []pageLinks `json:"instances_links"`
 	Instances []Instance  `json:"instances"`

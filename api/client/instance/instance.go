@@ -23,22 +23,23 @@ type InstanceClient struct {
 	HttpClient *http.Client
 }
 
-func (client *InstanceClient) Create(name, imageID, regionID, zoneID, networkID, serviceAccountID, flavorID string, disk int, keypairIDs []string, tags map[string]string, userData string) (*api.Instance, error) {
+func (client *InstanceClient) Create(name, imageID, regionID, zoneID, networkID, serviceAccountID, flavorID string, disk int, keypairIDs []string, initialVolumes []api.InstanceInitialVolume, tags map[string]string, userData string) (*api.Instance, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
 	type createBody struct {
-		Name             string            `json:"name"`
-		ImageID          string            `json:"image_id"`
-		RegionID         string            `json:"region_id"`
-		ZoneID           string            `json:"zone_id,omitempty"`
-		ServiceAccountID string            `json:"service_account_id,omitempty"`
-		NetworkID        string            `json:"network_id"`
-		FlavorId         string            `json:"flavor_id"`
-		Disk             int               `json:"disk,omitempty"`
-		KeypairIDs       []string          `json:"keypair_ids,omitempty"`
-		Tags             map[string]string `json:"tags"`
-		UserData         string            `json:"user_data"`
+		Name             string                      `json:"name"`
+		ImageID          string                      `json:"image_id"`
+		RegionID         string                      `json:"region_id"`
+		ZoneID           string                      `json:"zone_id,omitempty"`
+		ServiceAccountID string                      `json:"service_account_id,omitempty"`
+		NetworkID        string                      `json:"network_id"`
+		FlavorId         string                      `json:"flavor_id"`
+		Disk             int                         `json:"disk,omitempty"`
+		KeypairIDs       []string                    `json:"keypair_ids,omitempty"`
+		InitialVolumes   []api.InstanceInitialVolume `json:"initial_volumes"`
+		Tags             map[string]string           `json:"tags"`
+		UserData         string                      `json:"user_data"`
 	}
 
 	body := createBody{
@@ -51,6 +52,7 @@ func (client *InstanceClient) Create(name, imageID, regionID, zoneID, networkID,
 		FlavorId:         flavorID,
 		Disk:             disk,
 		KeypairIDs:       keypairIDs,
+		InitialVolumes:   initialVolumes,
 		Tags:             tags,
 		UserData:         userData,
 	}

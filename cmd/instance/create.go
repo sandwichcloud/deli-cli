@@ -28,6 +28,7 @@ type createCommand struct {
 	flavorId         *string
 	disk             *int
 	keypairIDs       *[]string
+	volumes          *[]int
 	tags             *map[string]string
 	userData         *string
 }
@@ -43,6 +44,7 @@ func (c *createCommand) Register(cmd *kingpin.CmdClause) {
 	c.flavorId = command.Flag("flavor-id", "The flavor of instance to launch").Required().String()
 	c.disk = command.Flag("disk", "The size of the disk to create, this overrides the flavor.").Int()
 	c.keypairIDs = command.Flag("keypair-id", "An ID of a keypair to add to the instance").Strings()
+	c.volumes = command.Flag("volume", "A size of a volume to attach to the instance").Ints()
 	c.tags = command.Flag("tag", "A metadata tag to add to the instance").StringMap()
 	c.userData = command.Flag("user-data", "User data to add to the instance").String()
 }
@@ -69,7 +71,16 @@ func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.P
 		}
 	}
 
-	instance, err := c.Application.APIClient.Instance().Create(*c.name, *c.imageID, *c.regionID, *c.zoneID, *c.networkID, *c.serviceAccountID, *c.flavorId, *c.disk, *c.keypairIDs, tags, *c.userData)
+	var initialVolumes []api.InstanceInitialVolume
+
+	for _, volumeSize := range *c.volumes {
+		initialVolumes = append(initialVolumes, api.InstanceInitialVolume{
+			Size:       volumeSize,
+			AutoDelete: true,
+		})
+	}
+
+	instance, err := c.Application.APIClient.Instance().Create(*c.name, *c.imageID, *c.regionID, *c.zoneID, *c.networkID, *c.serviceAccountID, *c.flavorId, *c.disk, *c.keypairIDs, initialVolumes, tags, *c.userData)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
