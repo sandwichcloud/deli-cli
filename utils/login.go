@@ -7,18 +7,16 @@ import (
 	"time"
 
 	"github.com/howeyc/gopass"
+	"github.com/sandwichcloud/deli-cli/api"
 	"github.com/sandwichcloud/deli-cli/api/client"
 	"github.com/sandwichcloud/deli-cli/api/client/auth"
 	"github.com/sandwichcloud/deli-cli/metadata"
 	"golang.org/x/oauth2"
 )
 
-func Login(authClient client.AuthClientInterface, username, password, authMethod string, interactive bool) (*oauth2.Token, error) {
-	apiDiscover, err := authClient.DiscoverAuth()
-	if err != nil {
-		return nil, err
-	}
+func Login(authClient client.AuthClientInterface, apiDiscover *api.AuthDiscover, username, password, authMethod string, interactive bool) (*oauth2.Token, error) {
 	var token *oauth2.Token
+	var err error
 	switch authMethod {
 	case "github":
 		if apiDiscover.Github == nil {

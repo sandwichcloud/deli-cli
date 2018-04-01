@@ -28,23 +28,29 @@ func (c *loginCommand) Register(cmd *kingpin.CmdClause) {
 }
 
 func (c *loginCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
-	apiDiscover, err := c.Application.APIClient.Auth().DiscoverAuth()
-	if err != nil {
-		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
-			err = errors.New(apiError.ToRawJSON())
-		}
-		return err
-	}
+	var apiDiscover api.AuthDiscover
 
 	var authMethod string
-	if *c.method == "" {
-		authMethod = *apiDiscover.Default
+	if *c.method != "metadata" {
+		var err error
+		apiDiscover, err = c.Application.APIClient.Auth().DiscoverAuth()
+		if err != nil {
+			if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
+				err = errors.New(apiError.ToRawJSON())
+			}
+			return err
+		}
+		if *c.method == "" {
+			authMethod = *apiDiscover.Default
+		} else {
+			authMethod = *c.method
+		}
 	} else {
-		authMethod = *c.method
+		authMethod = "metadata"
 	}
 
 	log.Infof("Using the %s Auth Method", authMethod)
-	token, err := utils.Login(c.Application.APIClient.Auth(), *c.username, *c.password, authMethod, true)
+	token, err := utils.Login(c.Application.APIClient.Auth(), &apiDiscover, *c.username, *c.password, authMethod, true)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
 			err = errors.New(apiError.ToRawJSON())
