@@ -1,22 +1,22 @@
-hash: 35fd55b8e61d5539d61fbbaa6e1c99e3975b14a4a68131a6e2d66bdb1e44f721
-updated: 2018-02-03T13:07:32.1351388-06:00
+hash: 27f59a3286219e05f6035775ee96fd40dcb465810b44a69530bbfdfcf9254c5f
+updated: 2018-04-01T12:29:56.5790868-05:00
 imports:
 - name: github.com/alecthomas/kingpin
-  version: 75c60582c55399763d53eeb59078d63d3616f58c
+  version: 2b154cee082ef5c544fa8ea1750b9eb6581b0040
 - name: github.com/alecthomas/units
   version: 2efee857e7cfd4f3d0138cc3cbb1b4966962b93a
 - name: github.com/fatih/structs
   version: a720dfa8df582c51dee1b36feabb906bde1588bd
 - name: github.com/golang/protobuf
-  version: bbd03ef6da3a115852eaf24c8a1c46aeb39aa175
+  version: e09c5db296004fbe3f74490e84dcd62c3c5ddb1b
   subpackages:
   - proto
 - name: github.com/howeyc/gopass
   version: bf9dde6d0d2c004a008c27aaee91170c786f6db8
 - name: github.com/mattn/go-runewidth
-  version: 97311d9f7767e3d6f422ea06661bc2c7a19e8a5d
+  version: a9d6d1e4dc51df2130326793d49971f238839169
 - name: github.com/nicksnyder/go-i18n
-  version: aa0ce51472e0a9982717fd19cf02cb08b1e433aa
+  version: a872b3191e0ec630a6c1219d74e56fe2053ab1c3
   subpackages:
   - i18n
   - i18n/bundle
@@ -25,15 +25,15 @@ imports:
 - name: github.com/olekukonko/tablewriter
   version: 0fd34425a5aee40ff3f260b34e6c3b0d59f58c66
 - name: github.com/pelletier/go-toml
-  version: acdc4509485b587f5e675510c4f2c63e90ff68a8
+  version: 66540cf1fcd2c3aee6f6787dfa32a6ae9a870f12
 - name: github.com/satori/go.uuid
   version: f58768cc1a7a7e77a3bd49e98cdd21419399b6a3
 - name: github.com/sirupsen/logrus
-  version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
+  version: c155da19408a8799da419ed3eeb0cb5db0ad5dbc
 - name: github.com/tarm/serial
   version: fdb95b50820e236308fffabc41ccf23f3056be77
 - name: golang.org/x/crypto
-  version: 1875d0a70c90e57f11972aefd42276df65e895b9
+  version: 12892e8c234f4fe6f6803f052061de9057903bb2
   subpackages:
   - curve25519
   - ed25519
@@ -43,21 +43,21 @@ imports:
   - ssh
   - ssh/terminal
 - name: golang.org/x/net
-  version: 2fb46b16b8dda405028c50f7c7f0f9dd1fa6bfb1
+  version: b68f30494add4df6bd8ef5e82803f308e7f7c59c
   subpackages:
   - context
   - context/ctxhttp
 - name: golang.org/x/oauth2
-  version: a032972e28060ca4f5644acffae3dfc268cc09db
+  version: fdc9e635145ae97e6c2cb777c48305600cf515cb
   subpackages:
   - internal
 - name: golang.org/x/sys
-  version: 37707fdb30a5b38865cfb95e5aab41707daec7fd
+  version: 378d26f46672a356c46195c28f61bdb4c0a781dd
   subpackages:
   - unix
   - windows
 - name: google.golang.org/appengine
-  version: 5bee14b453b4c71be47ec1781b0fa61c2ea182db
+  version: ad39d7fab7c60b2493fdc318c3d2cdb2128f92a4
   subpackages:
   - internal
   - internal/base
@@ -67,5 +67,5 @@ imports:
   - internal/urlfetch
   - urlfetch
 - name: gopkg.in/yaml.v2
-  version: d670f9405373e636a5a2765eea47fac0c9bc91a4
+  version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
 testImports: []

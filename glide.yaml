@@ -11,7 +11,7 @@ import:
 - package: github.com/satori/go.uuid
   version: ^1.1.0
 - package: github.com/alecthomas/kingpin
-  version: 75c60582c55399763d53eeb59078d63d3616f58c
+  version: 2b154cee082ef5c544fa8ea1750b9eb6581b0040
 - package: github.com/olekukonko/tablewriter
   version: 0fd34425a5aee40ff3f260b34e6c3b0d59f58c66
 - package: github.com/fatih/structs
