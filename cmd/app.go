@@ -37,9 +37,9 @@ type Command struct {
 }
 
 func (app *Application) Setup() {
-	app.CLIApp = kingpin.New("deli", "Sandwich Cloud CLI")
+	app.CLIApp = kingpin.New("deli", "Sandwich Cloud CLI").PreAction(app.setupLogging)
 
-	app.Debug = app.CLIApp.Flag("debug", "Debug logging.").Short('d').PreAction(app.setupLogging).Bool()
+	app.Debug = app.CLIApp.Flag("debug", "Debug logging.").Short('d').Bool()
 	apiServer := app.CLIApp.Flag("api-server", "Sandwich Cloud API Server [Env: DELI_API_SERVER]").Default("http://localhost:8080").Envar("DELI_API_SERVER").String()
 
 	apiClient := &client.SandwichClient{APIServer: apiServer}
@@ -54,6 +54,7 @@ func (app *Application) setupLogging(_ *kingpin.ParseElement, _ *kingpin.ParseCo
 	if *app.Debug {
 		log.SetLevel(log.DebugLevel)
 	}
+
 	return nil
 }
 
