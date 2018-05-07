@@ -142,13 +142,12 @@ type ImageMember struct {
 }
 
 type TokenInfo struct {
-	Username           string    `json:"username,omitempty"`
-	Driver             string    `json:"driver,omitempty"`
-	ServiceAccountID   uuid.UUID `json:"service_account_id,omitempty"`
-	ServiceAccountName string    `json:"service_account_name,omitempty"`
-	ProjectID          string    `json:"project_id,omitempty"`
-	GlobalRoles        []string  `json:"global_roles"`
-	ProjectRoles       []string  `json:"project_roles,omitempty"`
+	Username         string    `json:"username,omitempty"`
+	Driver           string    `json:"driver,omitempty"`
+	ServiceAccountID uuid.UUID `json:"service_account_id,omitempty"`
+	ProjectID        string    `json:"project_id,omitempty"`
+	GlobalRoles      []string  `json:"global_roles"`
+	ProjectRoles     []string  `json:"project_roles,omitempty"`
 }
 
 type Network struct {
@@ -273,12 +272,18 @@ type ServiceAccount struct {
 	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	Roles     []string  `json:"roles"`
+	Keys      []string  `json:"keys"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type ServiceAccountList struct {
-	Links           []pageLinks      `json:"service-accounts_links"`
-	ServiceAccounts []ServiceAccount `json:"service-accounts"`
+type GlobalServiceAccountList struct {
+	Links           []pageLinks      `json:"global-service-accounts_links"`
+	ServiceAccounts []ServiceAccount `json:"global-service-accounts"`
+}
+
+type ProjectServiceAccountList struct {
+	Links           []pageLinks      `json:"project-service-accounts_links"`
+	ServiceAccounts []ServiceAccount `json:"project-service-accounts"`
 }
 
 type DatabaseUser struct {

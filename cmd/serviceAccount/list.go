@@ -15,9 +15,10 @@ import (
 
 type listCommand struct {
 	cmd.Command
-	raw    *bool
-	limit  *int
-	marker *string
+	project bool
+	raw     *bool
+	limit   *int
+	marker  *string
 }
 
 func (c *listCommand) Register(cmd *kingpin.CmdClause) {
@@ -31,35 +32,69 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
+	if c.project {
+		err = c.Application.SetScopedToken()
+	} else {
+		err = c.Application.SetUnScopedToken()
+	}
 	if err != nil {
 		return err
 	}
-	serviceAccounts, err := c.Application.APIClient.ServiceAccount().List(*c.limit, *c.marker)
-	if err != nil {
-		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
-			err = errors.New(apiError.ToRawJSON())
-		}
-		return err
-	} else {
-		if *c.raw {
-			serviceAccountsBytes, _ := json.MarshalIndent(serviceAccounts, "", "  ")
-			fmt.Println(string(serviceAccountsBytes))
+	if c.project {
+		serviceAccounts, err := c.Application.APIClient.ProjectServiceAccount().ProjectList(*c.limit, *c.marker)
+		if err != nil {
+			if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
+				err = errors.New(apiError.ToRawJSON())
+			}
+			return err
 		} else {
-			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Name", "ID"})
-			table.SetAlignment(tablewriter.ALIGN_LEFT)
-			if len(serviceAccounts.Links) == 1 {
-				nextPage := serviceAccounts.Links[0]
-				nextPageUrl, _ := url.Parse(nextPage.HREF)
-				table.SetCaption(true, fmt.Sprintf("Next Page Marker %s", nextPageUrl.Query().Get("marker")))
-			}
+			if *c.raw {
+				serviceAccountsBytes, _ := json.MarshalIndent(serviceAccounts, "", "  ")
+				fmt.Println(string(serviceAccountsBytes))
+			} else {
+				table := tablewriter.NewWriter(os.Stdout)
+				table.SetHeader([]string{"Name", "ID"})
+				table.SetAlignment(tablewriter.ALIGN_LEFT)
+				if len(serviceAccounts.Links) == 1 {
+					nextPage := serviceAccounts.Links[0]
+					nextPageUrl, _ := url.Parse(nextPage.HREF)
+					table.SetCaption(true, fmt.Sprintf("Next Page Marker %s", nextPageUrl.Query().Get("marker")))
+				}
 
-			for _, serviceAccount := range serviceAccounts.ServiceAccounts {
-				table.Append([]string{serviceAccount.Name, serviceAccount.ID.String()})
-			}
+				for _, serviceAccount := range serviceAccounts.ServiceAccounts {
+					table.Append([]string{serviceAccount.Name, serviceAccount.ID.String()})
+				}
 
-			table.Render()
+				table.Render()
+			}
+		}
+	} else {
+		serviceAccounts, err := c.Application.APIClient.GlobalServiceAccount().GlobalList(*c.limit, *c.marker)
+		if err != nil {
+			if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
+				err = errors.New(apiError.ToRawJSON())
+			}
+			return err
+		} else {
+			if *c.raw {
+				serviceAccountsBytes, _ := json.MarshalIndent(serviceAccounts, "", "  ")
+				fmt.Println(string(serviceAccountsBytes))
+			} else {
+				table := tablewriter.NewWriter(os.Stdout)
+				table.SetHeader([]string{"Name", "ID"})
+				table.SetAlignment(tablewriter.ALIGN_LEFT)
+				if len(serviceAccounts.Links) == 1 {
+					nextPage := serviceAccounts.Links[0]
+					nextPageUrl, _ := url.Parse(nextPage.HREF)
+					table.SetCaption(true, fmt.Sprintf("Next Page Marker %s", nextPageUrl.Query().Get("marker")))
+				}
+
+				for _, serviceAccount := range serviceAccounts.ServiceAccounts {
+					table.Append([]string{serviceAccount.Name, serviceAccount.ID.String()})
+				}
+
+				table.Render()
+			}
 		}
 	}
 	return nil

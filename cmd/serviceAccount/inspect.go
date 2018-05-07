@@ -17,6 +17,7 @@ import (
 
 type inspectCommand struct {
 	cmd.Command
+	project          bool
 	raw              *bool
 	serviceAccountID *string
 }
@@ -31,11 +32,21 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
+	if c.project {
+		err = c.Application.SetScopedToken()
+	} else {
+		err = c.Application.SetUnScopedToken()
+	}
 	if err != nil {
 		return err
 	}
-	serviceAccount, err := c.Application.APIClient.ServiceAccount().Get(*c.serviceAccountID)
+
+	var serviceAccount *api.ServiceAccount
+	if c.project {
+		serviceAccount, err = c.Application.APIClient.ProjectServiceAccount().Get(*c.serviceAccountID)
+	} else {
+		serviceAccount, err = c.Application.APIClient.GlobalServiceAccount().Get(*c.serviceAccountID)
+	}
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())

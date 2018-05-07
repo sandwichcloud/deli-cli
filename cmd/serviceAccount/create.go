@@ -13,8 +13,9 @@ import (
 
 type createCommand struct {
 	cmd.Command
-	raw  *bool
-	name *string
+	project bool
+	raw     *bool
+	name    *string
 }
 
 func (c *createCommand) Register(cmd *kingpin.CmdClause) {
@@ -27,12 +28,21 @@ func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
+	if c.project {
+		err = c.Application.SetScopedToken()
+	} else {
+		err = c.Application.SetUnScopedToken()
+	}
 	if err != nil {
 		return err
 	}
 
-	serviceAccount, err := c.Application.APIClient.ServiceAccount().Create(*c.name)
+	var serviceAccount *api.ServiceAccount
+	if c.project {
+		serviceAccount, err = c.Application.APIClient.ProjectServiceAccount().Create(*c.name)
+	} else {
+		serviceAccount, err = c.Application.APIClient.GlobalServiceAccount().Create(*c.name)
+	}
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())

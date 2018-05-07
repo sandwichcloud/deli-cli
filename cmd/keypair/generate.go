@@ -84,7 +84,7 @@ func (c *generateCommand) action(element *kingpin.ParseElement, context *kingpin
 			keypairBytes, _ := json.MarshalIndent(keyPairMap, "", "  ")
 			fmt.Println(string(keypairBytes))
 		} else {
-			logrus.Infof("Keypair '%s' created with an ID of '%s' and saved to '%s'", keypair.Name, keypair.ID, keyPath)
+			logrus.Infof("Keypair '%s' created with an ID of '%s' and saved to '%s'", keypair.Name, keypair.ID, path.Join(keyPath, "id_"+*c.name))
 		}
 	}
 

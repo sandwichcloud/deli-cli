@@ -119,6 +119,9 @@ func (app *Application) SaveCreds() error {
 }
 
 func (app *Application) isExpired(token *oauth2.Token) bool {
+	if token.Expiry.IsZero() {
+		return false
+	}
 	return token.Expiry.Add(-10 * time.Second).Before(time.Now())
 }
 

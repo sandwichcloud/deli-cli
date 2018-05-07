@@ -47,7 +47,8 @@ type ClientInterface interface {
 	Policy() PolicyClientInterface
 	GlobalRole() RoleClientInterface
 	ProjectRole() RoleClientInterface
-	ServiceAccount() ServiceAccountClientInterface
+	GlobalServiceAccount() ServiceAccountClientInterface
+	ProjectServiceAccount() ServiceAccountClientInterface
 	SetToken(token *oauth2.Token)
 }
 
@@ -178,8 +179,11 @@ type ServiceAccountClientInterface interface {
 	Create(name string) (*api.ServiceAccount, error)
 	Get(id string) (*api.ServiceAccount, error)
 	Delete(id string) error
-	List(limit int, marker string) (*api.ServiceAccountList, error)
+	GlobalList(limit int, marker string) (*api.GlobalServiceAccountList, error)
+	ProjectList(limit int, marker string) (*api.ProjectServiceAccountList, error)
 	Update(id string, roles []string) error
+	CreateKey(id, name string) (*oauth2.Token, error)
+	DeleteKey(id, name string) error
 }
 
 func (client *SandwichClient) createOAuthClient() *http.Client {
@@ -253,8 +257,12 @@ func (client *SandwichClient) ProjectRole() RoleClientInterface {
 	return &role.RoleClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient(), Type: "project-roles"}
 }
 
-func (client *SandwichClient) ServiceAccount() ServiceAccountClientInterface {
-	return &serviceAccount.ServiceAccountClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient()}
+func (client *SandwichClient) GlobalServiceAccount() ServiceAccountClientInterface {
+	return &serviceAccount.ServiceAccountClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient(), Type: "global-service-accounts"}
+}
+
+func (client *SandwichClient) ProjectServiceAccount() ServiceAccountClientInterface {
+	return &serviceAccount.ServiceAccountClient{APIServer: client.APIServer, HttpClient: client.createOAuthClient(), Type: "project-service-accounts"}
 }
 
 func (client *SandwichClient) SetToken(token *oauth2.Token) {

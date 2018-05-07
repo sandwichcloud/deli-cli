@@ -24,14 +24,14 @@ func (c *loginCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("login", "Login to the Sandwich Cloud API").Action(c.action)
 	c.method = command.Flag("method", "Method to use for auth, if not given uses the API default.").String()
 	c.username = command.Flag("username", "Username to auth with").Short('u').String()
-	c.password = command.Flag("password", "User password to auth with. If not given, will prompt for input.").Short('p').String()
+	c.password = command.Flag("password", "User password to auth with. If not given and required, will prompt for input.").Short('p').String()
 }
 
 func (c *loginCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	var apiDiscover api.AuthDiscover
 
 	var authMethod string
-	if *c.method != "metadata" {
+	if *c.method != "metadata" && *c.method != "manual" {
 		var err error
 		apiDiscover, err = c.Application.APIClient.Auth().DiscoverAuth()
 		if err != nil {
@@ -46,7 +46,7 @@ func (c *loginCommand) action(element *kingpin.ParseElement, context *kingpin.Pa
 			authMethod = *c.method
 		}
 	} else {
-		authMethod = "metadata"
+		authMethod = *c.method
 	}
 
 	log.Infof("Using the %s Auth Method", authMethod)
@@ -62,8 +62,9 @@ func (c *loginCommand) action(element *kingpin.ParseElement, context *kingpin.Pa
 		Unscoped: token,
 	}
 
-	if *c.method == "metadata" {
+	if *c.method == "metadata" || *c.method == "manual" {
 		// Metadata's token is always scoped
+		// Manual tokens may or may not be scoped, so always think they are
 		c.Application.AuthTokens.Scoped = c.Application.AuthTokens.Unscoped
 	}
 

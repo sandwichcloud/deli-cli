@@ -79,6 +79,18 @@ func Login(authClient client.AuthClientInterface, apiDiscover *api.AuthDiscover,
 			TokenType:   "Bearer",
 			Expiry:      time.Now().Add(30 * time.Minute),
 		}
+	case "manual":
+		for interactive && password == "" {
+			passwordBytes, err := gopass.GetPasswdPrompt("Please enter your token: ", true, os.Stdin, os.Stdout)
+			if err != nil {
+				return nil, err
+			}
+			password = string(passwordBytes)
+		}
+		token = &oauth2.Token{
+			AccessToken: password,
+			TokenType:   "Bearer",
+		}
 	default:
 		return nil, errors.New(fmt.Sprintf("Unknown API Auth Driver %s", authMethod))
 	}
