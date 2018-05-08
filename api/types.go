@@ -119,9 +119,8 @@ type Image struct {
 	ProjectID    uuid.UUID `json:"project_id"`
 	Name         string    `json:"name"`
 	FileName     string    `json:"file_name"`
-	Public       bool      `json:"public"`
-	Locked       bool      `json:"locked"`
 	RegionID     uuid.UUID `json:"region_id"`
+	Visibility   string    `json:"visibility"`
 	State        string    `json:"state"`
 	ErrorMessage string    `json:"error_message"`
 	CreatedAt    time.Time `json:"created_at"`

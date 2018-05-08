@@ -214,14 +214,6 @@ func (client *ImageClient) ActionSetVisibility(id string, public bool) error {
 	return nil
 }
 
-func (client *ImageClient) ActionLock(id string) error {
-	return nil
-}
-
-func (client *ImageClient) ActionUnlock(id string) error {
-	return nil
-}
-
 func (client *ImageClient) MemberAdd(id, projectID string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()

@@ -105,8 +105,6 @@ type ImageClientInterface interface {
 	Delete(id string) error
 	List(visibility string, limit int, marker string) (*api.ImageList, error)
 	ActionSetVisibility(id string, public bool) error
-	ActionLock(id string) error
-	ActionUnlock(id string) error
 	MemberAdd(id, projectID string) error
 	MemberList(id string) (*api.ImageMemberList, error)
 	MemberRemove(id, projectID string) error
