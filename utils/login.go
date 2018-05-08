@@ -45,23 +45,6 @@ func Login(authClient client.AuthClientInterface, apiDiscover *api.AuthDiscover,
 			otpCode := string(otpBytes)
 			token, err = authClient.GithubLogin(*apiDiscover.Github, username, password, otpCode)
 		}
-	case "database":
-		if apiDiscover.Database == nil {
-			return nil, errors.New("Database auth method is not enabled on this API Server.")
-		}
-
-		if username == "" {
-			return nil, errors.New("Username is required for Database Authentication")
-		}
-
-		for interactive && password == "" {
-			passwordBytes, err := gopass.GetPasswdPrompt("Please enter your password: ", true, os.Stdin, os.Stdout)
-			if err != nil {
-				return nil, err
-			}
-			password = string(passwordBytes)
-		}
-		token, err = authClient.DatabaseLogin(*apiDiscover.Database, username, password)
 	case "metadata":
 		mClient := metadata.MetaDataClient{}
 		err := mClient.Connect("/dev/ttyS0")

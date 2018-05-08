@@ -14,9 +14,8 @@ type pageLinks struct {
 }
 
 type AuthDiscover struct {
-	Default  *string             `json:"default"`
-	Github   *GithubAuthDriver   `json:"github"`
-	Database *DatabaseAuthDriver `json:"database"`
+	Default *string           `json:"default"`
+	Github  *GithubAuthDriver `json:"github"`
 }
 
 type GithubAuthDriver struct {
@@ -52,6 +51,7 @@ type ProjectMember struct {
 	Username  string    `json:"username"`
 	Driver    string    `json:"driver"`
 	Roles     []string  `json:"roles"`
+	State     string    `json:"state"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -255,6 +255,7 @@ type Role struct {
 	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	Policies  []string  `json:"policies"`
+	State     string    `json:"state"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -273,6 +274,7 @@ type ServiceAccount struct {
 	Name      string    `json:"name"`
 	Roles     []string  `json:"roles"`
 	Keys      []string  `json:"keys"`
+	State     string    `json:"state"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -284,16 +286,4 @@ type GlobalServiceAccountList struct {
 type ProjectServiceAccountList struct {
 	Links           []pageLinks      `json:"project-service-accounts_links"`
 	ServiceAccounts []ServiceAccount `json:"project-service-accounts"`
-}
-
-type DatabaseUser struct {
-	ID        uuid.UUID `json:"id"`
-	Username  string    `json:"username"`
-	Roles     []string  `json:"roles"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
-type DatabaseUserList struct {
-	Links []pageLinks    `json:"users_links"`
-	Users []DatabaseUser `json:"users"`
 }
