@@ -19,20 +19,20 @@ fmt: ## run go fmt
 
 build: ## build the go packages
 	@echo "Running $@"
-	@go build -i -ldflags "-X main.Version=${VERSION}" -o bin/${BINARY} .
+	@go build -ldflags "-X main.Version=${VERSION}" -o bin/${BINARY} .
 	@mv bin/${BINARY} ${GOPATH}/bin/${BINARY}-dev
 
 build-linux: ## build the go packages for Linux
 	@echo "Running $@"
-	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -i -ldflags "-X main.Version=${VERSION}" -o bin/${BINARY}_linux_amd64 .
+	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.Version=${VERSION}" -o bin/${BINARY}_linux_amd64 .
 
 build-osx: ## build the go packages for OSX
 	@echo "Running $@"
-	@GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -i -ldflags "-X main.Version=${VERSION}" -o bin/${BINARY}_darwin_amd64 .
+	@GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.Version=${VERSION}" -o bin/${BINARY}_darwin_amd64 .
 
 build-windows: ## build the go packages for Windows
 	@echo "Running $@"
-	@GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -i -ldflags "-X main.Version=${VERSION}" -o bin/${BINARY}_windows_amd64.exe .
+	@GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.Version=${VERSION}" -o bin/${BINARY}_windows_amd64.exe .
 
 test: ## run test
 	@echo "Running $@"
