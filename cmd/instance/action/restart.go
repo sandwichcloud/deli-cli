@@ -12,15 +12,16 @@ import (
 
 type RestartCommand struct {
 	cmd.Command
-	Raw        *bool
-	instanceID *string
-	hard       *bool
-	timeout    *int
+	Project *string
+	Raw     *bool
+	name    *string
+	hard    *bool
+	timeout *int
 }
 
 func (c *RestartCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("restart", "Restart an instance").Action(c.action)
-	c.instanceID = command.Arg("instance ID", "The instance ID").Required().String()
+	c.name = command.Arg("name", "The instance name").Required().String()
 	c.hard = command.Flag("hard", "Hard stop the instance").Default("false").Bool()
 	c.timeout = command.Flag("timeout", "Time in seconds until the instance is hard stopped").Default("60").Int()
 }
@@ -30,11 +31,7 @@ func (c *RestartCommand) action(element *kingpin.ParseElement, context *kingpin.
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	err = c.Application.APIClient.Instance().ActionRestart(*c.instanceID, *c.hard, *c.timeout)
+	err = c.Application.APIClient.Instance(*c.Project).ActionRestart(*c.name, *c.hard, *c.timeout)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.Raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -44,7 +41,7 @@ func (c *RestartCommand) action(element *kingpin.ParseElement, context *kingpin.
 		if *c.Raw {
 			fmt.Println("{}")
 		} else {
-			logrus.Infof("Instance with the id of '%s' is being restarted", *c.instanceID)
+			logrus.Infof("Instance '%s' is being restarted", *c.name)
 		}
 	}
 	return nil

@@ -12,13 +12,14 @@ import (
 
 type StartCommand struct {
 	cmd.Command
-	Raw        *bool
-	instanceID *string
+	Project *string
+	Raw     *bool
+	name    *string
 }
 
 func (c *StartCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("start", "Start an instance").Action(c.action)
-	c.instanceID = command.Arg("instance ID", "The instance ID").Required().String()
+	c.name = command.Arg("name", "The instance name").Required().String()
 }
 
 func (c *StartCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -26,11 +27,7 @@ func (c *StartCommand) action(element *kingpin.ParseElement, context *kingpin.Pa
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	err = c.Application.APIClient.Instance().ActionStart(*c.instanceID)
+	err = c.Application.APIClient.Instance(*c.Project).ActionStart(*c.name)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.Raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -40,7 +37,7 @@ func (c *StartCommand) action(element *kingpin.ParseElement, context *kingpin.Pa
 		if *c.Raw {
 			fmt.Println("{}")
 		} else {
-			logrus.Infof("Instance with the id of '%s' is being started", *c.instanceID)
+			logrus.Infof("Instance '%s' is being started", *c.name)
 		}
 	}
 	return nil

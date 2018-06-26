@@ -17,11 +17,4 @@ func (c *Command) Register(app *cmd.Application) {
 	loginCommand.Application = c.Application
 	loginCommand.Register(command)
 
-	infoCommand := infoCommand{}
-	infoCommand.Application = c.Application
-	infoCommand.Register(command)
-
-	scopeCommand := scopeCommand{}
-	scopeCommand.Application = c.Application
-	scopeCommand.Register(command)
 }

@@ -20,6 +20,7 @@ fmt: ## run go fmt
 build: ## build the go packages
 	@echo "Running $@"
 	@go build -i -ldflags "-X main.Version=${VERSION}" -o bin/${BINARY} .
+	@mv bin/${BINARY} ${GOPATH}/bin/${BINARY}-dev
 
 build-linux: ## build the go packages for Linux
 	@echo "Running $@"

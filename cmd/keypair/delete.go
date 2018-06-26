@@ -12,13 +12,14 @@ import (
 
 type deleteCommand struct {
 	cmd.Command
-	raw       *bool
-	keypairID *string
+	project *string
+	raw     *bool
+	name    *string
 }
 
 func (c *deleteCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("delete", "Delete a keypair").Action(c.action)
-	c.keypairID = command.Arg("keypair ID", "The keypair ID").Required().String()
+	c.name = command.Arg("name", "The keypair name").Required().String()
 }
 
 func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -26,11 +27,7 @@ func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	err = c.Application.APIClient.Keypair().Delete(*c.keypairID)
+	err = c.Application.APIClient.Keypair(*c.project).Delete(*c.name)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -40,7 +37,7 @@ func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.P
 		if *c.raw {
 			fmt.Println("{}")
 		} else {
-			logrus.Infof("Keypair with the id of '%s' is being deleted", *c.keypairID)
+			logrus.Infof("Keypair '%s' is being deleted", *c.name)
 		}
 	}
 	return nil

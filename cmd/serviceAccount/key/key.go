@@ -7,7 +7,7 @@ import (
 
 type Command struct {
 	cmd.Command
-	Project bool
+	Project *string
 	Raw     *bool
 }
 

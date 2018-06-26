@@ -19,9 +19,10 @@ import (
 
 type listCommand struct {
 	cmd.Command
-	raw    *bool
-	limit  *int
-	marker *string
+	project *string
+	raw     *bool
+	limit   *int
+	marker  *string
 }
 
 func (c *listCommand) Register(cmd *kingpin.CmdClause) {
@@ -35,11 +36,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	keypairs, err := c.Application.APIClient.Keypair().List(*c.limit, *c.marker)
+	keypairs, err := c.Application.APIClient.Keypair(*c.project).List(*c.limit, *c.marker)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -51,7 +48,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 			fmt.Println(string(keypairsBytes))
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Name", "ID"})
+			table.SetHeader([]string{"Name"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
 			if len(keypairs.Links) == 1 {
 				nextPage := keypairs.Links[0]
@@ -60,7 +57,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 			}
 
 			for _, keypair := range keypairs.KeyPairs {
-				table.Append([]string{keypair.Name, keypair.ID.String()})
+				table.Append([]string{keypair.Name})
 			}
 
 			table.Render()

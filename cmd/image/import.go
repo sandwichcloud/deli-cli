@@ -15,14 +15,16 @@ import (
 type importCommand struct {
 	cmd.Command
 	name     *string
-	regionID *string
+	region   *string
 	fileName *string
+	project  *string
+	raw      *bool
 }
 
 func (c *importCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("import", "Import an image").Action(c.action)
 	c.name = command.Arg("name", "The image name").Required().String()
-	c.regionID = command.Flag("region-id", "The region to create the image in").Required().String()
+	c.region = command.Flag("region", "The region to create the image in").Required().String()
 	c.fileName = command.Arg("file name", "The image's file name").Required().String()
 }
 
@@ -31,22 +33,18 @@ func (c *importCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
+	image, err := c.Application.APIClient.Image(*c.project).Create(*c.name, *c.region, *c.fileName)
 	if err != nil {
-		return err
-	}
-	image, err := c.Application.APIClient.Image().Create(*c.name, *c.regionID, *c.fileName)
-	if err != nil {
-		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
+		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
 		}
 		return err
 	} else {
-		if *raw {
+		if *c.raw {
 			imageBytes, _ := json.MarshalIndent(image, "", "  ")
 			fmt.Println(string(imageBytes))
 		} else {
-			logrus.Infof("Image '%s' imported with an ID of '%s'", image.Name, image.ID)
+			logrus.Infof("Image '%s' imported", image.Name)
 		}
 	}
 	return nil

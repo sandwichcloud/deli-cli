@@ -22,12 +22,7 @@ type GithubAuthDriver struct {
 	//Github auth driver has no options
 }
 
-type DatabaseAuthDriver struct {
-	//Database auth driver has no options
-}
-
 type Project struct {
-	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	CreatedAt time.Time `json:"created_at"`
 }
@@ -46,22 +41,7 @@ type ProjectQuota struct {
 	UsedDisk int `json:"used_disk"`
 }
 
-type ProjectMember struct {
-	ID        uuid.UUID `json:"id"`
-	Username  string    `json:"username"`
-	Driver    string    `json:"driver"`
-	Roles     []string  `json:"roles"`
-	State     string    `json:"state"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
-type ProjectMemberList struct {
-	Links          []pageLinks     `json:"project-members_links"`
-	ProjectMembers []ProjectMember `json:"project-members"`
-}
-
 type Region struct {
-	ID             uuid.UUID `json:"id"`
 	Name           string    `json:"name"`
 	Datacenter     string    `json:"datacenter"`
 	ImageDatastore string    `json:"image_datastore"`
@@ -70,6 +50,7 @@ type Region struct {
 	State          string    `json:"state"`
 	ErrorMessage   string    `json:"error_message"`
 	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 type RegionList struct {
@@ -78,9 +59,8 @@ type RegionList struct {
 }
 
 type Zone struct {
-	ID                   uuid.UUID `json:"id"`
 	Name                 string    `json:"name"`
-	RegionID             uuid.UUID `json:"region_id"`
+	RegionName           string    `json:"region_name"`
 	VMCluster            string    `json:"vm_cluster"`
 	VMDatastore          string    `json:"vm_datastore"`
 	VMFolder             string    `json:"vm_folder"`
@@ -90,6 +70,7 @@ type Zone struct {
 	State                string    `json:"state"`
 	ErrorMessage         string    `json:"error_message"`
 	CreatedAt            time.Time `json:"created_at"`
+	UpdatedAt            time.Time `json:"updated_at"`
 }
 
 type ZoneList struct {
@@ -98,15 +79,15 @@ type ZoneList struct {
 }
 
 type Volume struct {
-	ID           uuid.UUID `json:"id"`
 	Name         string    `json:"name"`
-	ZoneID       uuid.UUID `json:"zone_id"`
+	ZoneName     string    `json:"zone_name"`
 	Size         int       `json:"size"`
-	AttachedTo   uuid.UUID `json:"attached_to"`
+	AttachedTo   string    `json:"attached_to"`
 	Task         string    `json:"task"`
 	State        string    `json:"state"`
 	ErrorMessage string    `json:"error_message"`
 	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 type VolumeList struct {
@@ -115,15 +96,15 @@ type VolumeList struct {
 }
 
 type Image struct {
-	ID           uuid.UUID `json:"id"`
-	ProjectID    uuid.UUID `json:"project_id"`
 	Name         string    `json:"name"`
+	ProjectName  string    `json:"project_name"`
 	FileName     string    `json:"file_name"`
-	RegionID     uuid.UUID `json:"region_id"`
+	RegionName   string    `json:"region_name"`
 	Visibility   string    `json:"visibility"`
 	State        string    `json:"state"`
 	ErrorMessage string    `json:"error_message"`
 	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 type ImageList struct {
@@ -131,26 +112,16 @@ type ImageList struct {
 	Images []Image     `json:"images"`
 }
 
-type ImageMemberList struct {
-	Links   []pageLinks   `json:"members_links"`
-	Members []ImageMember `json:"members"`
-}
-
-type ImageMember struct {
-	ProjectID uuid.UUID `json:"project_id"`
-}
-
 type TokenInfo struct {
-	Username         string    `json:"username,omitempty"`
-	Driver           string    `json:"driver,omitempty"`
-	ServiceAccountID uuid.UUID `json:"service_account_id,omitempty"`
-	ProjectID        string    `json:"project_id,omitempty"`
-	GlobalRoles      []string  `json:"global_roles"`
-	ProjectRoles     []string  `json:"project_roles,omitempty"`
+	Username           string   `json:"username,omitempty"`
+	Driver             string   `json:"driver,omitempty"`
+	ServiceAccountName string   `json:"service_account_name,omitempty"`
+	ProjectName        string   `json:"project_name,omitempty"`
+	GlobalRoles        []string `json:"global_roles"`
+	ProjectRoles       []string `json:"project_roles,omitempty"`
 }
 
 type Network struct {
-	ID           uuid.UUID `json:"id"`
 	Name         string    `json:"name"`
 	PortGroup    string    `json:"port_group"`
 	Cidr         string    `json:"cidr"`
@@ -158,10 +129,11 @@ type Network struct {
 	DNSServers   []net.IP  `json:"dns_servers"`
 	PoolStart    net.IP    `json:"pool_start"`
 	PoolEnd      net.IP    `json:"pool_end"`
-	RegionID     uuid.UUID `json:"region_id"`
+	RegionName   string    `json:"region_name"`
 	State        string    `json:"state"`
 	ErrorMessage string    `json:"error_message"`
 	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 type NetworkList struct {
@@ -170,9 +142,8 @@ type NetworkList struct {
 }
 
 type Keypair struct {
-	ID        uuid.UUID `json:"id" structs:"id"`
-	Name      string    `json:"name" structs:"name"`
-	PublicKey string    `json:"public_key" structs:"public_key"`
+	Name      string `json:"name" structs:"name"`
+	PublicKey string `json:"public_key" structs:"public_key"`
 }
 
 type KeypairList struct {
@@ -181,11 +152,12 @@ type KeypairList struct {
 }
 
 type NetworkPort struct {
-	ID        uuid.UUID `json:"id"`
-	NetworkID uuid.UUID `json:"network_id"`
-	IPAddress net.IP    `json:"ip_address"`
-	State     string    `json:"state"`
-	CreatedAt time.Time `json:"created_at"`
+	ID          uuid.UUID `json:"id"`
+	NetworkName string    `json:"network_name"`
+	IPAddress   net.IP    `json:"ip_address"`
+	State       string    `json:"state"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type NetworkPortList struct {
@@ -194,12 +166,12 @@ type NetworkPortList struct {
 }
 
 type Flavor struct {
-	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	VCPUS     int       `json:"vcpus"`
 	Ram       int       `json:"ram"`
 	Disk      int       `json:"disk"`
 	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type FlavorList struct {
@@ -208,25 +180,25 @@ type FlavorList struct {
 }
 
 type Instance struct {
-	ID               uuid.UUID         `json:"id"`
-	Name             string            `json:"name"`
-	ImageID          uuid.UUID         `json:"image_id"`
-	NetworkPortID    uuid.UUID         `json:"network_port_id"`
-	RegionID         uuid.UUID         `json:"region_id"`
-	ZoneID           uuid.UUID         `json:"zone_id"`
-	ServiceAccountID uuid.UUID         `json:"service_account_id"`
-	Tags             map[string]string `json:"tags"`
-	UserData         string            `json:"user_data"`
-	KeypairIDs       []uuid.UUID       `json:"keypair_ids"`
-	FlavorID         uuid.UUID         `json:"flavor_id"`
-	VCPUS            int               `json:"vcpus"`
-	Ram              int               `json:"ram"`
-	Disk             int               `json:"disk"`
-	State            string            `json:"state"`
-	PowerState       string            `json:"power_state"`
-	Task             string            `json:"task"`
-	ErrorMessage     string            `json:"error_message"`
-	CreatedAt        time.Time         `json:"created_at"`
+	Name               string            `json:"name"`
+	ImageName          string            `json:"image_name"`
+	NetworkPortID      uuid.UUID         `json:"network_port_id"`
+	RegionName         string            `json:"region_name"`
+	ZoneName           string            `json:"zone_name"`
+	ServiceAccountName string            `json:"service_account_name"`
+	Tags               map[string]string `json:"tags"`
+	UserData           string            `json:"user_data"`
+	KeypairNames       []string          `json:"keypair_names"`
+	FlavorName         string            `json:"flavor_name"`
+	VCPUS              int               `json:"vcpus"`
+	Ram                int               `json:"ram"`
+	Disk               int               `json:"disk"`
+	State              string            `json:"state"`
+	PowerState         string            `json:"power_state"`
+	Task               string            `json:"task"`
+	ErrorMessage       string            `json:"error_message"`
+	CreatedAt          time.Time         `json:"created_at"`
+	UpdatedAt          time.Time         `json:"updated_at"`
 }
 
 type InstanceInitialVolume struct {
@@ -239,50 +211,50 @@ type InstanceList struct {
 	Instances []Instance  `json:"instances"`
 }
 
-type Policy struct {
+type Permissions struct {
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 	Tags        []string `json:"tags"`
 }
 
-type PolicyList struct {
-	Links    []pageLinks `json:"policies_links"`
-	Policies []Policy    `json:"policies"`
+type PermissionList struct {
+	Links       []pageLinks   `json:"permissions_links"`
+	Permissions []Permissions `json:"permissions"`
 }
 
 type Role struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Policies  []string  `json:"policies"`
-	State     string    `json:"state"`
-	CreatedAt time.Time `json:"created_at"`
+	Name        string    `json:"name"`
+	Permissions []string  `json:"permissions"`
+	State       string    `json:"state"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-type GlobalRoleList struct {
-	Links []pageLinks `json:"global-roles_links"`
-	Roles []Role      `json:"global-roles"`
-}
-
-type ProjectRoleList struct {
-	Links []pageLinks `json:"project-roles_links"`
-	Roles []Role      `json:"project-roles"`
+type RoleList struct {
+	Links []pageLinks `json:"roles_links"`
+	Roles []Role      `json:"roles"`
 }
 
 type ServiceAccount struct {
-	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
-	Roles     []string  `json:"roles"`
+	Email     string    `json:"email"`
 	Keys      []string  `json:"keys"`
 	State     string    `json:"state"`
 	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
-type GlobalServiceAccountList struct {
-	Links           []pageLinks      `json:"global-service-accounts_links"`
-	ServiceAccounts []ServiceAccount `json:"global-service-accounts"`
+type ServiceAccountList struct {
+	Links           []pageLinks      `json:"service-accounts_links"`
+	ServiceAccounts []ServiceAccount `json:"service-accounts"`
 }
 
-type ProjectServiceAccountList struct {
-	Links           []pageLinks      `json:"project-service-accounts_links"`
-	ServiceAccounts []ServiceAccount `json:"project-service-accounts"`
+type PolicyBinding struct {
+	Role    string   `json:"role"`
+	Members []string `json:"members"`
+}
+
+type Policy struct {
+	Bindings        []PolicyBinding `json:"bindings"`
+	ResourceVersion string          `json:"resource_version"`
 }

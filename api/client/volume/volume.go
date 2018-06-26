@@ -15,28 +15,29 @@ import (
 )
 
 type VolumeClient struct {
-	APIServer  *string
-	HttpClient *http.Client
+	APIServer   *string
+	HttpClient  *http.Client
+	ProjectName string
 }
 
-func (client *VolumeClient) Create(name, zoneID string, size int) (*api.Volume, error) {
+func (client *VolumeClient) Create(name, zoneName string, size int) (*api.Volume, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
 	type createBody struct {
-		Name   string `json:"name"`
-		ZoneID string `json:"zone_id"`
-		Size   int    `json:"size"`
+		Name     string `json:"name"`
+		ZoneName string `json:"zone_name"`
+		Size     int    `json:"size"`
 	}
 
 	body := createBody{
-		Name:   name,
-		ZoneID: zoneID,
-		Size:   size,
+		Name:     name,
+		ZoneName: zoneName,
+		Size:     size,
 	}
 	jsonBody, _ := json.Marshal(body)
 
-	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/v1/volumes", "application/json", bytes.NewBuffer(jsonBody))
+	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/compute/v1/projects/"+client.ProjectName+"/volumes", "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -63,11 +64,11 @@ func (client *VolumeClient) Create(name, zoneID string, size int) (*api.Volume, 
 	return volume, nil
 }
 
-func (client *VolumeClient) Get(id string) (*api.Volume, error) {
+func (client *VolumeClient) Get(name string) (*api.Volume, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
-	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/v1/volumes/"+id)
+	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/compute/v1/projects/"+client.ProjectName+"/volumes/"+name)
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -94,10 +95,10 @@ func (client *VolumeClient) Get(id string) (*api.Volume, error) {
 	return volume, nil
 }
 
-func (client *VolumeClient) Delete(id string) error {
+func (client *VolumeClient) Delete(name string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
-	Url, err := url.Parse(*client.APIServer + "/v1/volumes/" + id)
+	Url, err := url.Parse(*client.APIServer + "/compute/v1/projects/" + client.ProjectName + "/volumes/" + name)
 	if err != nil {
 		return err
 	}
@@ -142,7 +143,7 @@ func (client *VolumeClient) List(limit int, marker string) (*api.VolumeList, err
 		parameters.Add("marker", marker)
 	}
 
-	Url, err := url.Parse(*client.APIServer + "/v1/volumes")
+	Url, err := url.Parse(*client.APIServer + "/compute/v1/projects/" + client.ProjectName + "/volumes")
 	if err != nil {
 		return nil, err
 	}
@@ -175,18 +176,18 @@ func (client *VolumeClient) List(limit int, marker string) (*api.VolumeList, err
 	return volumes, nil
 }
 
-func (client *VolumeClient) ActionAttach(id, instanceID string) error {
+func (client *VolumeClient) ActionAttach(name, instanceName string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
 	type attachBody struct {
-		InstanceID string `json:"instance_id"`
+		InstanceName string `json:"instance_name"`
 	}
 
-	body := attachBody{InstanceID: instanceID}
+	body := attachBody{InstanceName: instanceName}
 	jsonBody, _ := json.Marshal(body)
 
-	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+fmt.Sprintf("/v1/volumes/%s/action/attach", id), "application/json", bytes.NewBuffer(jsonBody))
+	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+fmt.Sprintf("/compute/v1/projects/%s/volumes/%s/action/attach", client.ProjectName, name), "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return api.ErrTimedOut
@@ -211,11 +212,11 @@ func (client *VolumeClient) ActionAttach(id, instanceID string) error {
 	return nil
 }
 
-func (client *VolumeClient) ActionDetach(id string) error {
+func (client *VolumeClient) ActionDetach(name string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
-	req, err := http.NewRequest(http.MethodPut, *client.APIServer+fmt.Sprintf("/v1/volumes/%s/action/detach", id), nil)
+	req, err := http.NewRequest(http.MethodPut, *client.APIServer+fmt.Sprintf("/compute/v1/projects/%s/volumes/%s/action/attach", client.ProjectName, name), nil)
 	if err != nil {
 		return err
 	}
@@ -243,7 +244,7 @@ func (client *VolumeClient) ActionDetach(id string) error {
 	return nil
 }
 
-func (client *VolumeClient) ActionGrow(id string, newSize int) error {
+func (client *VolumeClient) ActionGrow(name string, newSize int) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
@@ -254,7 +255,7 @@ func (client *VolumeClient) ActionGrow(id string, newSize int) error {
 	body := growBody{Size: newSize}
 	jsonBody, _ := json.Marshal(body)
 
-	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+fmt.Sprintf("/v1/volumes/%s/action/grow", id), "application/json", bytes.NewBuffer(jsonBody))
+	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+fmt.Sprintf("/compute/v1/projects/%s/volumes/%s/action/attach", client.ProjectName, name), "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return api.ErrTimedOut
@@ -279,7 +280,7 @@ func (client *VolumeClient) ActionGrow(id string, newSize int) error {
 	return nil
 }
 
-func (client *VolumeClient) ActionClone(id, name string) (*api.Volume, error) {
+func (client *VolumeClient) ActionClone(name, newName string) (*api.Volume, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
@@ -287,10 +288,10 @@ func (client *VolumeClient) ActionClone(id, name string) (*api.Volume, error) {
 		Name string `json:"name"`
 	}
 
-	body := cloneBody{Name: name}
+	body := cloneBody{Name: newName}
 	jsonBody, _ := json.Marshal(body)
 
-	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+fmt.Sprintf("/v1/volumes/%s/action/clone", id), "application/json", bytes.NewBuffer(jsonBody))
+	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+fmt.Sprintf("/compute/v1/projects/%s/volumes/%s/action/attach", client.ProjectName, name), "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut

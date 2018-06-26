@@ -4,27 +4,22 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"reflect"
-
 	"os"
 
 	"github.com/alecthomas/kingpin"
-	"github.com/fatih/structs"
 	"github.com/olekukonko/tablewriter"
 	"github.com/sandwichcloud/deli-cli/api"
 	"github.com/sandwichcloud/deli-cli/cmd"
-	"github.com/sandwichcloud/deli-cli/utils"
 )
 
 type inspectCommand struct {
 	cmd.Command
-	policyName *string
-	raw        *bool
+	project *string
+	raw     *bool
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
-	command := cmd.Command("inspect", "Inspect a policy").Action(c.action)
-	c.policyName = command.Arg("policy name", "The policy name").Required().String()
+	cmd.Command("inspect", "Inspect a policy").Action(c.action)
 }
 
 func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -32,11 +27,15 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetUnScopedToken()
 	if err != nil {
 		return err
 	}
-	policy, err := c.Application.APIClient.Policy().Get(*c.policyName)
+	var policy *api.Policy
+	if c.project != nil {
+		policy, err = c.Application.APIClient.ProjectPolicy(*c.project).Get()
+	} else {
+		policy, err = c.Application.APIClient.SystemPolicy().Get()
+	}
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -48,18 +47,13 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 			fmt.Println(string(policyBytes))
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Property", "Value"})
+			table.SetHeader([]string{"Role", "Members"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
 			table.SetAutoMergeCells(true)
 
-			for _, field := range structs.Fields(policy) {
-				if field.Kind() == reflect.Slice {
-					v := reflect.ValueOf(field.Value())
-					for i := 0; i < v.Len(); i++ {
-						table.Append([]string{field.Tag("json"), utils.InterfaceToString(v.Index(i))})
-					}
-				} else {
-					table.Append([]string{field.Tag("json"), utils.InterfaceToString(field.Value())})
+			for _, binding := range policy.Bindings {
+				for _, member := range binding.Members {
+					table.Append([]string{binding.Role, member})
 				}
 			}
 			table.Render()

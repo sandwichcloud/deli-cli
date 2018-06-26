@@ -19,14 +19,14 @@ import (
 
 type listCommand struct {
 	cmd.Command
-	limit      *int
-	marker     *string
-	visibility *string
+	limit   *int
+	marker  *string
+	project *string
+	raw     *bool
 }
 
 func (c *listCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("list", "List images").Action(c.action)
-	c.visibility = command.Flag("visibility", "The visibility state to filter by (PUBLIC, PRIVATE)").Default("PRIVATE").Enum("PUBLIC", "PRIVATE")
 	c.limit = command.Flag("limit", "Number of projects to show per page").Default("20").Int()
 	c.marker = command.Flag("marker", "Marker Token for the next page of results").String()
 }
@@ -36,23 +36,19 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
+	images, err := c.Application.APIClient.Image(*c.project).List(*c.limit, *c.marker)
 	if err != nil {
-		return err
-	}
-	images, err := c.Application.APIClient.Image().List(*c.visibility, *c.limit, *c.marker)
-	if err != nil {
-		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
+		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
 		}
 		return err
 	} else {
-		if *raw {
+		if *c.raw {
 			imageBytes, _ := json.MarshalIndent(images, "", "  ")
 			fmt.Println(string(imageBytes))
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Name", "ID"})
+			table.SetHeader([]string{"Name"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
 			if len(images.Links) == 1 {
 				nextPage := images.Links[0]
@@ -61,7 +57,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 			}
 
 			for _, image := range images.Images {
-				table.Append([]string{image.Name, image.ID.String()})
+				table.Append([]string{image.Name})
 			}
 
 			table.Render()

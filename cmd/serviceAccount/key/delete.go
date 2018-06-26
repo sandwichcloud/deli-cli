@@ -12,15 +12,15 @@ import (
 
 type deleteCommand struct {
 	cmd.Command
-	project          bool
-	raw              *bool
-	serviceAccountID *string
-	keyName          *string
+	project *string
+	raw     *bool
+	name    *string
+	keyName *string
 }
 
 func (c *deleteCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("delete", "Delete a key").Action(c.action)
-	c.serviceAccountID = command.Arg("service account ID", "The service account ID").Required().String()
+	c.name = command.Arg("service account name", "The service account name").Required().String()
 	c.keyName = command.Arg("key name", "The key name").Required().String()
 }
 
@@ -29,19 +29,14 @@ func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	if c.project {
-		err = c.Application.SetScopedToken()
-	} else {
-		err = c.Application.SetUnScopedToken()
-	}
 	if err != nil {
 		return err
 	}
 
-	if c.project {
-		err = c.Application.APIClient.ProjectServiceAccount().DeleteKey(*c.serviceAccountID, *c.keyName)
+	if c.project != nil {
+		err = c.Application.APIClient.ProjectServiceAccount(*c.project).DeleteKey(*c.name, *c.keyName)
 	} else {
-		err = c.Application.APIClient.GlobalServiceAccount().DeleteKey(*c.serviceAccountID, *c.keyName)
+		err = c.Application.APIClient.SystemServiceAccount().DeleteKey(*c.name, *c.keyName)
 	}
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
@@ -52,7 +47,7 @@ func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.P
 		if *c.raw {
 			fmt.Println("{}")
 		} else {
-			logrus.Infof("Key '%s' has been delete from the service account '%s'", *c.keyName, *c.serviceAccountID)
+			logrus.Infof("Key '%s' has been delete from the service account '%s'", *c.keyName, *c.name)
 		}
 	}
 	return nil

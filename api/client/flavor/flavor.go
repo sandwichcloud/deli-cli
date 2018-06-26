@@ -32,7 +32,7 @@ func (client *FlavorClient) Create(name string, vcpus, ram, disk int) (*api.Flav
 	body := createBody{Name: name, VCPUS: vcpus, Ram: ram, Disk: disk}
 	jsonBody, _ := json.Marshal(body)
 
-	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/v1/flavors", "application/json", bytes.NewBuffer(jsonBody))
+	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/compute/v1/flavors", "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -59,11 +59,11 @@ func (client *FlavorClient) Create(name string, vcpus, ram, disk int) (*api.Flav
 	return flavor, nil
 }
 
-func (client *FlavorClient) Get(id string) (*api.Flavor, error) {
+func (client *FlavorClient) Get(name string) (*api.Flavor, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
-	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/v1/flavors/"+id)
+	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/compute/v1/flavors/"+name)
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -90,10 +90,10 @@ func (client *FlavorClient) Get(id string) (*api.Flavor, error) {
 	return flavor, nil
 }
 
-func (client *FlavorClient) Delete(id string) error {
+func (client *FlavorClient) Delete(name string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
-	Url, err := url.Parse(*client.APIServer + "/v1/flavors/" + id)
+	Url, err := url.Parse(*client.APIServer + "/compute/v1/flavors/" + name)
 	if err != nil {
 		return err
 	}
@@ -138,7 +138,7 @@ func (client *FlavorClient) List(limit int, marker string) (*api.FlavorList, err
 		parameters.Add("marker", marker)
 	}
 
-	Url, err := url.Parse(*client.APIServer + "/v1/flavors")
+	Url, err := url.Parse(*client.APIServer + "/compute/v1/flavors")
 	if err != nil {
 		return nil, err
 	}

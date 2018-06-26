@@ -15,7 +15,7 @@ import (
 type createCommand struct {
 	cmd.Command
 	name                 *string
-	regionID             *string
+	region               *string
 	vmCluster            *string
 	vmDatastore          *string
 	vmFolder             *string
@@ -27,7 +27,7 @@ type createCommand struct {
 func (c *createCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("create", "Create a zone").Action(c.action)
 	c.name = command.Arg("name", "The zone name").Required().String()
-	c.regionID = command.Flag("region-id", "The region this zone belongs to").Required().String()
+	c.region = command.Flag("region", "The region this zone belongs to").Required().String()
 	c.vmCluster = command.Flag("vm-cluster", "The VMware cluster for this zone").Required().String()
 	c.vmDatastore = command.Flag("vm-datastore", "The VMware datastore for this zone").Required().String()
 	c.vmFolder = command.Flag("vm-folder", "The VMware VM & Templates folder to keep vms in").String()
@@ -41,11 +41,7 @@ func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetUnScopedToken()
-	if err != nil {
-		return err
-	}
-	region, err := c.Application.APIClient.Zone().Create(*c.name, *c.regionID, *c.vmCluster, *c.vmDatastore, *c.vmFolder, *c.coreProvisionPercent, *c.ramProvisionPercent)
+	zone, err := c.Application.APIClient.Zone().Create(*c.name, *c.region, *c.vmCluster, *c.vmDatastore, *c.vmFolder, *c.coreProvisionPercent, *c.ramProvisionPercent)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -53,10 +49,10 @@ func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.P
 		return err
 	} else {
 		if *c.raw {
-			regionBytes, _ := json.MarshalIndent(region, "", "  ")
+			regionBytes, _ := json.MarshalIndent(zone, "", "  ")
 			fmt.Println(string(regionBytes))
 		} else {
-			logrus.Infof("Zone '%s' created with an ID of '%s'", region.Name, region.ID)
+			logrus.Infof("Zone '%s' created", zone.Name)
 		}
 	}
 	return nil

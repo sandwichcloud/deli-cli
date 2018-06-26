@@ -19,9 +19,10 @@ import (
 
 type listCommand struct {
 	cmd.Command
-	raw    *bool
-	limit  *int
-	marker *string
+	raw     *bool
+	project *string
+	limit   *int
+	marker  *string
 }
 
 func (c *listCommand) Register(cmd *kingpin.CmdClause) {
@@ -35,11 +36,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	volumes, err := c.Application.APIClient.Volume().List(*c.limit, *c.marker)
+	volumes, err := c.Application.APIClient.Volume(*c.project).List(*c.limit, *c.marker)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -51,7 +48,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 			fmt.Println(string(volumeBytes))
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Name", "ID"})
+			table.SetHeader([]string{"name"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
 			if len(volumes.Links) == 1 {
 				nextPage := volumes.Links[0]
@@ -60,7 +57,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 			}
 
 			for _, volume := range volumes.Volumes {
-				table.Append([]string{volume.Name, volume.ID.String()})
+				table.Append([]string{volume.Name})
 			}
 
 			table.Render()

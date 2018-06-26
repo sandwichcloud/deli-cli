@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"time"
-
 	"errors"
 
 	"io/ioutil"
@@ -20,16 +18,11 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type AuthTokens struct {
-	Unscoped *oauth2.Token `json:"unscoped"`
-	Scoped   *oauth2.Token `json:"scoped,omitempty"`
-}
-
 type Application struct {
-	CLIApp     *kingpin.Application
-	Debug      *bool
-	APIClient  client.ClientInterface
-	AuthTokens *AuthTokens
+	CLIApp    *kingpin.Application
+	Debug     *bool
+	APIClient client.ClientInterface
+	AuthToken *oauth2.Token
 }
 
 type Command struct {
@@ -84,17 +77,14 @@ func (app *Application) LoadCreds() error {
 		return errors.New("Cannot read existing sandwich cloud credentials. Have you logged in?")
 	}
 
-	tokens := &AuthTokens{}
-	err = json.Unmarshal(creds_data, tokens)
+	token := &oauth2.Token{}
+	err = json.Unmarshal(creds_data, token)
 	if err != nil {
 		return errors.New("Existing sandwich cloud credentials have corrupted, please login again.")
 	}
 
-	if tokens.Unscoped == nil {
-		return errors.New("No token found. Have you logged in?")
-	}
-
-	app.AuthTokens = tokens
+	app.AuthToken = token
+	app.APIClient.SetToken(app.AuthToken)
 	return nil
 }
 
@@ -109,42 +99,11 @@ func (app *Application) SaveCreds() error {
 		os.Mkdir(config_dir, os.ModePerm)
 	}
 
-	token_json, _ := json.Marshal(app.AuthTokens)
+	token_json, _ := json.Marshal(app.AuthToken)
 	err = ioutil.WriteFile(path.Join(config_dir, "credentials"), token_json, 0644)
 	if err != nil {
 		return errors.New("Failed to write token data to file!")
 	}
 
-	return nil
-}
-
-func (app *Application) isExpired(token *oauth2.Token) bool {
-	if token.Expiry.IsZero() {
-		return false
-	}
-	return token.Expiry.Add(-10 * time.Second).Before(time.Now())
-}
-
-func (app *Application) SetUnScopedToken() error {
-
-	if app.isExpired(app.AuthTokens.Unscoped) {
-		return errors.New("Token is expired, please login to get a new one.")
-	}
-
-	app.APIClient.SetToken(app.AuthTokens.Unscoped)
-	return nil
-}
-
-func (app *Application) SetScopedToken() error {
-
-	if app.AuthTokens.Scoped == nil {
-		return errors.New("No scoped token found, please scope your token to a project.")
-	}
-
-	if app.isExpired(app.AuthTokens.Scoped) {
-		return errors.New("Scoped Token is expired, please re-scope to get a new one.")
-	}
-
-	app.APIClient.SetToken(app.AuthTokens.Scoped)
 	return nil
 }

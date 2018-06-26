@@ -28,10 +28,6 @@ func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetUnScopedToken()
-	if err != nil {
-		return err
-	}
 	project, err := c.Application.APIClient.Project().Create(*c.name)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
@@ -43,7 +39,7 @@ func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.P
 			projectBytes, _ := json.MarshalIndent(project, "", "  ")
 			fmt.Println(string(projectBytes))
 		} else {
-			logrus.Infof("Project '%s' created with an ID of '%s'", project.Name, project.ID)
+			logrus.Infof("Project '%s' created", project.Name)
 		}
 	}
 	return nil

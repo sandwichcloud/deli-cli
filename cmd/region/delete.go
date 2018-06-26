@@ -12,13 +12,13 @@ import (
 
 type deleteCommand struct {
 	cmd.Command
-	id  *string
-	raw *bool
+	name *string
+	raw  *bool
 }
 
 func (c *deleteCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("delete", "Delete a region").Action(c.action)
-	c.id = command.Arg("id", "The region id").Required().String()
+	c.name = command.Arg("name", "The region name").Required().String()
 }
 
 func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -26,11 +26,7 @@ func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetUnScopedToken()
-	if err != nil {
-		return err
-	}
-	err = c.Application.APIClient.Region().Delete(*c.id)
+	err = c.Application.APIClient.Region().Delete(*c.name)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -40,7 +36,7 @@ func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.P
 		if *c.raw {
 			fmt.Println("{}")
 		} else {
-			logrus.Infof("Region with the id of %s is being deleted.", *c.id)
+			logrus.Infof("Region '%s' is being deleted.", *c.name)
 		}
 	}
 	return nil

@@ -15,7 +15,7 @@ import (
 
 type listCommand struct {
 	cmd.Command
-	project bool
+	project *string
 	raw     *bool
 	limit   *int
 	marker  *string
@@ -32,69 +32,39 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 	if err != nil {
 		return err
 	}
-	if c.project {
-		err = c.Application.SetScopedToken()
-	} else {
-		err = c.Application.SetUnScopedToken()
-	}
 	if err != nil {
 		return err
 	}
-	if c.project {
-		roles, err := c.Application.APIClient.ProjectRole().ProjectList(*c.limit, *c.marker)
-		if err != nil {
-			if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
-				err = errors.New(apiError.ToRawJSON())
-			}
-			return err
-		} else {
-			if *c.raw {
-				rolesBytes, _ := json.MarshalIndent(roles, "", "  ")
-				fmt.Println(string(rolesBytes))
-			} else {
-				table := tablewriter.NewWriter(os.Stdout)
-				table.SetHeader([]string{"Name", "ID"})
-				table.SetAlignment(tablewriter.ALIGN_LEFT)
-				if len(roles.Links) == 1 {
-					nextPage := roles.Links[0]
-					nextPageUrl, _ := url.Parse(nextPage.HREF)
-					table.SetCaption(true, fmt.Sprintf("Next Page Marker %s", nextPageUrl.Query().Get("marker")))
-				}
-
-				for _, role := range roles.Roles {
-					table.Append([]string{role.Name, role.ID.String()})
-				}
-
-				table.Render()
-			}
-		}
+	var roles *api.RoleList
+	if c.project != nil {
+		roles, err = c.Application.APIClient.ProjectRole(*c.project).List(*c.limit, *c.marker)
 	} else {
-		roles, err := c.Application.APIClient.GlobalRole().GlobalList(*c.limit, *c.marker)
-		if err != nil {
-			if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
-				err = errors.New(apiError.ToRawJSON())
-			}
-			return err
+		roles, err = c.Application.APIClient.SystemRole().List(*c.limit, *c.marker)
+	}
+	if err != nil {
+		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
+			err = errors.New(apiError.ToRawJSON())
+		}
+		return err
+	} else {
+		if *c.raw {
+			rolesBytes, _ := json.MarshalIndent(roles, "", "  ")
+			fmt.Println(string(rolesBytes))
 		} else {
-			if *c.raw {
-				rolesBytes, _ := json.MarshalIndent(roles, "", "  ")
-				fmt.Println(string(rolesBytes))
-			} else {
-				table := tablewriter.NewWriter(os.Stdout)
-				table.SetHeader([]string{"Name", "ID"})
-				table.SetAlignment(tablewriter.ALIGN_LEFT)
-				if len(roles.Links) == 1 {
-					nextPage := roles.Links[0]
-					nextPageUrl, _ := url.Parse(nextPage.HREF)
-					table.SetCaption(true, fmt.Sprintf("Next Page Marker %s", nextPageUrl.Query().Get("marker")))
-				}
-
-				for _, role := range roles.Roles {
-					table.Append([]string{role.Name, role.ID.String()})
-				}
-
-				table.Render()
+			table := tablewriter.NewWriter(os.Stdout)
+			table.SetHeader([]string{"Name"})
+			table.SetAlignment(tablewriter.ALIGN_LEFT)
+			if len(roles.Links) == 1 {
+				nextPage := roles.Links[0]
+				nextPageUrl, _ := url.Parse(nextPage.HREF)
+				table.SetCaption(true, fmt.Sprintf("Next Page Marker %s", nextPageUrl.Query().Get("marker")))
 			}
+
+			for _, role := range roles.Roles {
+				table.Append([]string{role.Name})
+			}
+
+			table.Render()
 		}
 	}
 	return nil

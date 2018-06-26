@@ -41,7 +41,7 @@ func (regionClient *RegionClient) Create(name, datacenter, imageDatastore, image
 	}
 	jsonBody, _ := json.Marshal(body)
 
-	response, err := ctxhttp.Post(ctx, regionClient.HttpClient, *regionClient.APIServer+"/v1/regions", "application/json", bytes.NewBuffer(jsonBody))
+	response, err := ctxhttp.Post(ctx, regionClient.HttpClient, *regionClient.APIServer+"/location/v1/regions", "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -68,11 +68,11 @@ func (regionClient *RegionClient) Create(name, datacenter, imageDatastore, image
 	return region, nil
 }
 
-func (regionClient *RegionClient) Get(id string) (*api.Region, error) {
+func (regionClient *RegionClient) Get(name string) (*api.Region, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
-	response, err := ctxhttp.Get(ctx, regionClient.HttpClient, *regionClient.APIServer+"/v1/regions/"+id)
+	response, err := ctxhttp.Get(ctx, regionClient.HttpClient, *regionClient.APIServer+"/location/v1/regions/"+name)
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -99,10 +99,10 @@ func (regionClient *RegionClient) Get(id string) (*api.Region, error) {
 	return region, nil
 }
 
-func (regionClient *RegionClient) Delete(id string) error {
+func (regionClient *RegionClient) Delete(name string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
-	Url, err := url.Parse(*regionClient.APIServer + "/v1/regions/" + id)
+	Url, err := url.Parse(*regionClient.APIServer + "/location/v1/regions/" + name)
 	if err != nil {
 		return err
 	}
@@ -136,14 +136,10 @@ func (regionClient *RegionClient) Delete(id string) error {
 	return nil
 }
 
-func (regionClient *RegionClient) List(name string, limit int, marker string) (*api.RegionList, error) {
+func (regionClient *RegionClient) List(limit int, marker string) (*api.RegionList, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 	parameters := url.Values{}
-
-	if len(name) > 0 {
-		parameters.Add("name", name)
-	}
 
 	parameters.Add("limit", strconv.FormatInt(int64(limit), 10))
 
@@ -151,7 +147,7 @@ func (regionClient *RegionClient) List(name string, limit int, marker string) (*
 		parameters.Add("marker", marker)
 	}
 
-	Url, err := url.Parse(*regionClient.APIServer + "/v1/regions")
+	Url, err := url.Parse(*regionClient.APIServer + "/location/v1/regions")
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +180,7 @@ func (regionClient *RegionClient) List(name string, limit int, marker string) (*
 	return regions, nil
 }
 
-func (regionClient *RegionClient) ActionSchedule(id string, schedulable bool) error {
+func (regionClient *RegionClient) ActionSchedule(name string, schedulable bool) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
@@ -195,7 +191,7 @@ func (regionClient *RegionClient) ActionSchedule(id string, schedulable bool) er
 	body := stopBody{Schedulable: schedulable}
 	jsonBody, _ := json.Marshal(body)
 
-	req, err := http.NewRequest(http.MethodPut, *regionClient.APIServer+fmt.Sprintf("/v1/regions/%s/action/schedule", id), bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequest(http.MethodPut, *regionClient.APIServer+fmt.Sprintf("/location/v1/regions/%s/action/schedule", name), bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return err
 	}

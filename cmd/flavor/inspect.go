@@ -17,12 +17,12 @@ import (
 
 type inspectCommand struct {
 	cmd.Command
-	flavorID *string
+	name *string
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("inspect", "Inspect a flavor").Action(c.action)
-	c.flavorID = command.Arg("flavor ID", "The flavor ID").String()
+	c.name = command.Arg("name", "The flavor name").String()
 }
 
 func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -30,11 +30,7 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetUnScopedToken()
-	if err != nil {
-		return err
-	}
-	flavor, err := c.Application.APIClient.Flavor().Get(*c.flavorID)
+	flavor, err := c.Application.APIClient.Flavor().Get(*c.name)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
 			err = errors.New(apiError.ToRawJSON())

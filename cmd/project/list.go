@@ -20,14 +20,12 @@ import (
 type listCommand struct {
 	cmd.Command
 	raw    *bool
-	all    *bool
 	limit  *int
 	marker *string
 }
 
 func (c *listCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("list", "List projects").Action(c.action)
-	c.all = command.Flag("all", "Include projects you are not a member of").Bool()
 	c.limit = command.Flag("limit", "Number of projects to show per page").Default("20").Int()
 	c.marker = command.Flag("marker", "Marker Token for the next page of results").String()
 }
@@ -37,11 +35,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetUnScopedToken()
-	if err != nil {
-		return err
-	}
-	projects, err := c.Application.APIClient.Project().List(*c.all, *c.limit, *c.marker)
+	projects, err := c.Application.APIClient.Project().List(*c.limit, *c.marker)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -53,7 +47,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 			fmt.Println(string(projectsBytes))
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Name", "ID"})
+			table.SetHeader([]string{"Name"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
 			if len(projects.Links) == 1 {
 				nextPage := projects.Links[0]
@@ -62,7 +56,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 			}
 
 			for _, project := range projects.Projects {
-				table.Append([]string{project.Name, project.ID.String()})
+				table.Append([]string{project.Name})
 			}
 
 			table.Render()

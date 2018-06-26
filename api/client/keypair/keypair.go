@@ -14,8 +14,9 @@ import (
 )
 
 type KeypairClient struct {
-	APIServer  *string
-	HttpClient *http.Client
+	APIServer   *string
+	HttpClient  *http.Client
+	ProjectName string
 }
 
 func (client *KeypairClient) Create(name, publicKey string) (*api.Keypair, error) {
@@ -30,7 +31,7 @@ func (client *KeypairClient) Create(name, publicKey string) (*api.Keypair, error
 	body := createBody{Name: name, PublicKey: publicKey}
 	jsonBody, _ := json.Marshal(body)
 
-	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/v1/keypairs", "application/json", bytes.NewBuffer(jsonBody))
+	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/compute/v1/projects/"+client.ProjectName+"/keypairs", "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -57,11 +58,11 @@ func (client *KeypairClient) Create(name, publicKey string) (*api.Keypair, error
 	return keypair, nil
 }
 
-func (client *KeypairClient) Get(id string) (*api.Keypair, error) {
+func (client *KeypairClient) Get(name string) (*api.Keypair, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
-	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/v1/keypairs/"+id)
+	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/compute/v1/projects/"+client.ProjectName+"/keypairs/"+name)
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -88,10 +89,10 @@ func (client *KeypairClient) Get(id string) (*api.Keypair, error) {
 	return keypair, nil
 }
 
-func (client *KeypairClient) Delete(id string) error {
+func (client *KeypairClient) Delete(name string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
-	Url, err := url.Parse(*client.APIServer + "/v1/keypairs/" + id)
+	Url, err := url.Parse(*client.APIServer + "/compute/v1/projects/" + client.ProjectName + "/keypairs/" + name)
 	if err != nil {
 		return err
 	}
@@ -136,7 +137,7 @@ func (client *KeypairClient) List(limit int, marker string) (*api.KeypairList, e
 		parameters.Add("marker", marker)
 	}
 
-	Url, err := url.Parse(*client.APIServer + "/v1/keypairs")
+	Url, err := url.Parse(*client.APIServer + "/compute/v1/projects/" + client.ProjectName + "/keypairs")
 	if err != nil {
 		return nil, err
 	}

@@ -33,10 +33,6 @@ func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetUnScopedToken()
-	if err != nil {
-		return err
-	}
 	flavor, err := c.Application.APIClient.Flavor().Create(*c.name, *c.vcpus, *c.ram, *c.disk)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
@@ -48,7 +44,7 @@ func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.P
 			flavorBytes, _ := json.MarshalIndent(flavor, "", "  ")
 			fmt.Println(string(flavorBytes))
 		} else {
-			logrus.Infof("Flavor '%s' created with an ID of '%s'", flavor.Name, flavor.ID)
+			logrus.Infof("Flavor '%s' created", flavor.Name)
 		}
 	}
 	return nil

@@ -12,12 +12,12 @@ import (
 
 type deleteCommand struct {
 	cmd.Command
-	networkID *string
+	name *string
 }
 
 func (c *deleteCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("delete", "Delete a network").Action(c.action)
-	c.networkID = command.Arg("network ID", "The network ID").Required().String()
+	c.name = command.Arg("name", "The network ID").Required().String()
 }
 
 func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -25,11 +25,7 @@ func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetUnScopedToken()
-	if err != nil {
-		return err
-	}
-	err = c.Application.APIClient.Network().Delete(*c.networkID)
+	err = c.Application.APIClient.Network().Delete(*c.name)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -39,7 +35,7 @@ func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.P
 		if *raw {
 			fmt.Println("{}")
 		} else {
-			logrus.Infof("Network with the id of '%s' is being deleted", *c.networkID)
+			logrus.Infof("Network '%s' is being deleted", *c.name)
 		}
 	}
 	return nil

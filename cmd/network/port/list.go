@@ -19,9 +19,10 @@ import (
 
 type listCommand struct {
 	cmd.Command
-	raw    *bool
-	limit  *int
-	marker *string
+	project *string
+	raw     *bool
+	limit   *int
+	marker  *string
 }
 
 func (c *listCommand) Register(cmd *kingpin.CmdClause) {
@@ -35,11 +36,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	networkPorts, err := c.Application.APIClient.NetworkPort().List(*c.limit, *c.marker)
+	networkPorts, err := c.Application.APIClient.NetworkPort(*c.project).List(*c.limit, *c.marker)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())

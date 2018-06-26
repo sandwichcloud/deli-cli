@@ -18,13 +18,14 @@ import (
 
 type inspectCommand struct {
 	cmd.Command
-	raw        *bool
-	instanceID *string
+	project *string
+	raw     *bool
+	name    *string
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("inspect", "Inspect an instance").Action(c.action)
-	c.instanceID = command.Arg("instance ID", "The instance ID").String()
+	c.name = command.Arg("name", "The instance name").String()
 }
 
 func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -32,11 +33,7 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	instance, err := c.Application.APIClient.Instance().Get(*c.instanceID)
+	instance, err := c.Application.APIClient.Instance(*c.project).Get(*c.name)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -50,7 +47,6 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Property", "Value"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
-			table.SetAutoMergeCells(true)
 
 			for _, field := range structs.Fields(instance) {
 				if field.Kind() == reflect.Slice {

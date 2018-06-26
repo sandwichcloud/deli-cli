@@ -12,16 +12,16 @@ import (
 
 type updateCommand struct {
 	cmd.Command
-	project  bool
-	raw      *bool
-	roleID   *string
-	policies *[]string
+	project     *string
+	raw         *bool
+	name        *string
+	permissions *[]string
 }
 
 func (c *updateCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("update", "Update a role").Action(c.action)
-	c.roleID = command.Arg("role ID", "The role ID").String()
-	c.policies = command.Flag("policy", "The policy to give the role").Required().Strings()
+	c.name = command.Arg("role name", "The role name").String()
+	c.permissions = command.Flag("permission", "The permission to give the role").Required().Strings()
 }
 
 func (c *updateCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -29,18 +29,13 @@ func (c *updateCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	if c.project {
-		err = c.Application.SetScopedToken()
-	} else {
-		err = c.Application.SetUnScopedToken()
-	}
 	if err != nil {
 		return err
 	}
-	if c.project {
-		err = c.Application.APIClient.ProjectRole().Update(*c.roleID, *c.policies)
+	if c.project != nil {
+		err = c.Application.APIClient.ProjectRole(*c.project).Update(*c.name, *c.permissions)
 	} else {
-		err = c.Application.APIClient.GlobalRole().Update(*c.roleID, *c.policies)
+		err = c.Application.APIClient.SystemRole().Update(*c.name, *c.permissions)
 	}
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
@@ -51,7 +46,7 @@ func (c *updateCommand) action(element *kingpin.ParseElement, context *kingpin.P
 		if *c.raw {
 			fmt.Println("{}")
 		} else {
-			logrus.Infof("Role with the id of %s has been updated.", *c.roleID)
+			logrus.Infof("Role '%s' has been updated.", *c.name)
 		}
 	}
 	return nil

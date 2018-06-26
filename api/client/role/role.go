@@ -19,19 +19,19 @@ type RoleClient struct {
 	Type       string
 }
 
-func (client *RoleClient) Create(name string, policies []string) (*api.Role, error) {
+func (client *RoleClient) Create(name string, permissions []string) (*api.Role, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
 	type createBody struct {
-		Name     string   `json:"name"`
-		Policies []string `json:"policies"`
+		Name        string   `json:"name"`
+		Permissions []string `json:"permissions"`
 	}
 
-	body := createBody{Name: name, Policies: policies}
+	body := createBody{Name: name, Permissions: permissions}
 	jsonBody, _ := json.Marshal(body)
 
-	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/v1/auth/"+client.Type, "application/json", bytes.NewBuffer(jsonBody))
+	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/iam/v1/"+client.Type, "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -58,11 +58,11 @@ func (client *RoleClient) Create(name string, policies []string) (*api.Role, err
 	return role, nil
 }
 
-func (client *RoleClient) Get(id string) (*api.Role, error) {
+func (client *RoleClient) Get(name string) (*api.Role, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
-	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/v1/auth/"+client.Type+"/"+id)
+	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/iam/v1/"+client.Type+"/"+name)
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -89,10 +89,10 @@ func (client *RoleClient) Get(id string) (*api.Role, error) {
 	return role, nil
 }
 
-func (client *RoleClient) Delete(id string) error {
+func (client *RoleClient) Delete(name string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
-	Url, err := url.Parse(*client.APIServer + "/v1/auth/" + client.Type + "/" + id)
+	Url, err := url.Parse(*client.APIServer + "/iam/v1/" + client.Type + "/" + name)
 	if err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func (client *RoleClient) Delete(id string) error {
 	return nil
 }
 
-func (client *RoleClient) GlobalList(limit int, marker string) (*api.GlobalRoleList, error) {
+func (client *RoleClient) List(limit int, marker string) (*api.RoleList, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 	parameters := url.Values{}
@@ -137,7 +137,7 @@ func (client *RoleClient) GlobalList(limit int, marker string) (*api.GlobalRoleL
 		parameters.Add("marker", marker)
 	}
 
-	Url, err := url.Parse(*client.APIServer + "/v1/auth/" + client.Type)
+	Url, err := url.Parse(*client.APIServer + "/iam/v1/" + client.Type)
 	if err != nil {
 		return nil, err
 	}
@@ -165,67 +165,23 @@ func (client *RoleClient) GlobalList(limit int, marker string) (*api.GlobalRoleL
 		return nil, apiError
 	}
 
-	roles := &api.GlobalRoleList{}
+	roles := &api.RoleList{}
 	json.Unmarshal(responseData, roles)
 	return roles, nil
 }
 
-func (client *RoleClient) ProjectList(limit int, marker string) (*api.ProjectRoleList, error) {
-	ctx, cancel := api.CreateTimeoutContext()
-	defer cancel()
-	parameters := url.Values{}
-
-	parameters.Add("limit", strconv.FormatInt(int64(limit), 10))
-
-	if len(marker) > 0 {
-		parameters.Add("marker", marker)
-	}
-
-	Url, err := url.Parse(*client.APIServer + "/v1/auth/" + client.Type)
-	if err != nil {
-		return nil, err
-	}
-	Url.RawQuery = parameters.Encode()
-
-	response, err := ctxhttp.Get(ctx, client.HttpClient, Url.String())
-	if err != nil {
-		if err == context.DeadlineExceeded {
-			return nil, api.ErrTimedOut
-		}
-		return nil, err
-	}
-
-	responseData, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-	response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		apiError, err := api.ParseErrors(response.StatusCode, responseData)
-		if err != nil {
-			return nil, err
-		}
-		return nil, apiError
-	}
-
-	roles := &api.ProjectRoleList{}
-	json.Unmarshal(responseData, roles)
-	return roles, nil
-}
-
-func (client *RoleClient) Update(id string, policies []string) error {
+func (client *RoleClient) Update(name string, permissions []string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
 	type updateRoleBody struct {
-		Policies []string `json:"policies"`
+		Permissions []string `json:"permissions"`
 	}
 
-	body := updateRoleBody{Policies: policies}
+	body := updateRoleBody{Permissions: permissions}
 	jsonBody, _ := json.Marshal(body)
 
-	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/v1/auth/"+client.Type+"/"+id, "application/json", bytes.NewBuffer(jsonBody))
+	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/iam/v1/"+client.Type+"/"+name, "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return api.ErrTimedOut

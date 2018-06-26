@@ -7,43 +7,43 @@ import (
 
 type Command struct {
 	cmd.Command
-	raw *bool
 }
 
 func (c *Command) Register(app *cmd.Application) {
 	c.Application = app
 	command := app.CLIApp.Command("volume", "Sandwich Cloud volume commands")
-	c.raw = command.Flag("raw", "Show raw json output").Bool()
+	project := command.Flag("project", "The project to use for this invocation").Required().String()
+	raw := command.Flag("raw", "Show raw json output").Bool()
 
-	createCommand := createCommand{raw: c.raw}
+	createCommand := createCommand{raw: raw, project: project}
 	createCommand.Application = c.Application
 	createCommand.Register(command)
 
-	inspectCommand := inspectCommand{raw: c.raw}
+	inspectCommand := inspectCommand{raw: raw, project: project}
 	inspectCommand.Application = c.Application
 	inspectCommand.Register(command)
 
-	listCommand := listCommand{raw: c.raw}
+	listCommand := listCommand{raw: raw, project: project}
 	listCommand.Application = c.Application
 	listCommand.Register(command)
 
-	deleteCommand := deleteCommand{raw: c.raw}
+	deleteCommand := deleteCommand{raw: raw, project: project}
 	deleteCommand.Application = c.Application
 	deleteCommand.Register(command)
 
-	attachCommand := action.AttachCommand{Raw: c.raw}
+	attachCommand := action.AttachCommand{Raw: raw, Project: project}
 	attachCommand.Application = c.Application
 	attachCommand.Register(command)
 
-	detachCommand := action.DetachCommand{Raw: c.raw}
+	detachCommand := action.DetachCommand{Raw: raw, Project: project}
 	detachCommand.Application = c.Application
 	detachCommand.Register(command)
 
-	growCommand := action.GrowCommand{Raw: c.raw}
+	growCommand := action.GrowCommand{Raw: raw, Project: project}
 	growCommand.Application = c.Application
 	growCommand.Register(command)
 
-	cloneCommand := action.CloneCommand{Raw: c.raw}
+	cloneCommand := action.CloneCommand{Raw: raw, Project: project}
 	cloneCommand.Application = c.Application
 	cloneCommand.Register(command)
 

@@ -12,15 +12,16 @@ import (
 
 type AttachCommand struct {
 	cmd.Command
-	Raw        *bool
-	volumeID   *string
-	instanceID *string
+	Raw          *bool
+	Project      *string
+	name         *string
+	instanceName *string
 }
 
 func (c *AttachCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("attach", "Attach a Volume to an Instance.").Action(c.action)
-	c.volumeID = command.Arg("volume ID", "The volume ID").Required().String()
-	c.instanceID = command.Arg("instance ID", "The instance ID").Required().String()
+	c.name = command.Arg("name", "The volume name").Required().String()
+	c.instanceName = command.Arg("instance ID", "The instance name").Required().String()
 }
 
 func (c *AttachCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -28,11 +29,7 @@ func (c *AttachCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	err = c.Application.APIClient.Volume().ActionAttach(*c.volumeID, *c.instanceID)
+	err = c.Application.APIClient.Volume(*c.Project).ActionAttach(*c.name, *c.instanceName)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.Raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -42,7 +39,7 @@ func (c *AttachCommand) action(element *kingpin.ParseElement, context *kingpin.P
 		if *c.Raw {
 			fmt.Println("{}")
 		} else {
-			logrus.Infof("The volume '%s' being attached to the instance '%s'", *c.volumeID, *c.instanceID)
+			logrus.Infof("The volume '%s' being attached to the instance '%s'", *c.name, *c.instanceName)
 		}
 	}
 	return nil

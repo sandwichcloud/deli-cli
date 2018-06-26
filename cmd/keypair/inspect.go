@@ -17,13 +17,14 @@ import (
 
 type inspectCommand struct {
 	cmd.Command
-	raw       *bool
-	keypairID *string
+	project *string
+	raw     *bool
+	name    *string
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("inspect", "Inspect a keypair").Action(c.action)
-	c.keypairID = command.Arg("keypair ID", "The keypair ID").Required().String()
+	c.name = command.Arg("name", "The keypair name").Required().String()
 }
 
 func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -31,11 +32,7 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	keypair, err := c.Application.APIClient.Keypair().Get(*c.keypairID)
+	keypair, err := c.Application.APIClient.Keypair(*c.project).Get(*c.name)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -49,7 +46,6 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Property", "Value"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
-			table.SetAutoMergeCells(true)
 
 			for _, field := range structs.Fields(keypair) {
 				if field.Tag("json") == "public_key" {

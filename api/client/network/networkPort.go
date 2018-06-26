@@ -13,15 +13,16 @@ import (
 )
 
 type NetworkPortClient struct {
-	APIServer  *string
-	HttpClient *http.Client
+	APIServer   *string
+	HttpClient  *http.Client
+	ProjectName string
 }
 
 func (client *NetworkPortClient) Get(id string) (*api.NetworkPort, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
-	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/v1/network-ports/"+id)
+	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/compute/v1/projects/"+client.ProjectName+"/network-ports/"+id)
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -59,7 +60,7 @@ func (client *NetworkPortClient) List(limit int, marker string) (*api.NetworkPor
 		parameters.Add("marker", marker)
 	}
 
-	Url, err := url.Parse(*client.APIServer + "/v1/network-ports")
+	Url, err := url.Parse(*client.APIServer + "/compute/v1/projects/" + client.ProjectName + "/network-ports")
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +96,7 @@ func (client *NetworkPortClient) List(limit int, marker string) (*api.NetworkPor
 func (client *NetworkPortClient) Delete(id string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
-	Url, err := url.Parse(*client.APIServer + "/v1/network-ports/" + id)
+	Url, err := url.Parse(*client.APIServer + "/compute/v1/projects/" + client.ProjectName + "/network-ports/" + id)
 	if err != nil {
 		return err
 	}

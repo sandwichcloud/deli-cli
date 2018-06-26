@@ -1,11 +1,12 @@
-package member
+package permission
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"reflect"
+
+	"os"
 
 	"github.com/alecthomas/kingpin"
 	"github.com/fatih/structs"
@@ -17,13 +18,13 @@ import (
 
 type inspectCommand struct {
 	cmd.Command
-	raw             *bool
-	projectMemberID *string
+	name *string
+	raw  *bool
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
-	command := cmd.Command("inspect", "Inspect a project member").Action(c.action)
-	c.projectMemberID = command.Arg("project member ID", "The project member ID").Required().String()
+	command := cmd.Command("inspect", "Inspect a permission").Action(c.action)
+	c.name = command.Arg("name", "The permission name").Required().String()
 }
 
 func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -31,11 +32,7 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	projectMember, err := c.Application.APIClient.Project().GetMember(*c.projectMemberID)
+	permission, err := c.Application.APIClient.Permission().Get(*c.name)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -43,14 +40,14 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 		return err
 	} else {
 		if *c.raw {
-			projectMemberBytes, _ := json.MarshalIndent(projectMember, "", "  ")
-			fmt.Println(string(projectMemberBytes))
+			permissionBytes, _ := json.MarshalIndent(permission, "", "  ")
+			fmt.Println(string(permissionBytes))
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Property", "Value"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
 
-			for _, field := range structs.Fields(projectMember) {
+			for _, field := range structs.Fields(permission) {
 				if field.Kind() == reflect.Slice {
 					v := reflect.ValueOf(field.Value())
 					for i := 0; i < v.Len(); i++ {

@@ -15,6 +15,7 @@ import (
 
 type importCommand struct {
 	cmd.Command
+	project   *string
 	raw       *bool
 	name      *string
 	publicKey *string
@@ -31,10 +32,6 @@ func (c *importCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
 
 	publicKeyBytes, err := ioutil.ReadFile(*c.publicKey)
 	if err != nil {
@@ -42,7 +39,7 @@ func (c *importCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	}
 	publicKey := string(publicKeyBytes)
 
-	keypair, err := c.Application.APIClient.Keypair().Create(*c.name, publicKey)
+	keypair, err := c.Application.APIClient.Keypair(*c.project).Create(*c.name, publicKey)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -54,7 +51,7 @@ func (c *importCommand) action(element *kingpin.ParseElement, context *kingpin.P
 			keypairBytes, _ := json.MarshalIndent(keyPairMap, "", "  ")
 			fmt.Println(string(keypairBytes))
 		} else {
-			logrus.Infof("Keypair '%s' imported with an ID of '%s'", keypair.Name, keypair.ID)
+			logrus.Infof("Keypair '%s' imported", keypair.Name)
 		}
 	}
 	return nil

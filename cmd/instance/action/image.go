@@ -13,15 +13,16 @@ import (
 
 type ImageCommand struct {
 	cmd.Command
-	Raw        *bool
-	instanceID *string
-	name       *string
+	Project   *string
+	Raw       *bool
+	name      *string
+	imageName *string
 }
 
 func (c *ImageCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("image", "Create an image from an instance").Action(c.action)
-	c.instanceID = command.Arg("instance ID", "The instance ID").Required().String()
-	c.name = command.Flag("name", "The image name").Required().String()
+	c.name = command.Arg("name", "The instance name").Required().String()
+	c.imageName = command.Flag("image-name", "The image name").Required().String()
 }
 
 func (c *ImageCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -29,11 +30,7 @@ func (c *ImageCommand) action(element *kingpin.ParseElement, context *kingpin.Pa
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	image, err := c.Application.APIClient.Instance().ActionImage(*c.instanceID, *c.name)
+	image, err := c.Application.APIClient.Instance(*c.Project).ActionImage(*c.name, *c.imageName)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.Raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -44,7 +41,7 @@ func (c *ImageCommand) action(element *kingpin.ParseElement, context *kingpin.Pa
 			imageBytes, _ := json.MarshalIndent(image, "", "  ")
 			fmt.Println(string(imageBytes))
 		} else {
-			logrus.Infof("The instance with the ID of '%s' is converting to an image called '%s' with an ID of '%s'", *c.instanceID, image.Name, image.ID)
+			logrus.Infof("The instance '%s' is converting to an image '%s'", *c.name, image.Name)
 		}
 	}
 	return nil

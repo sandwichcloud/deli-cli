@@ -1,12 +1,11 @@
 package policy
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"net/url"
-	"strconv"
 
 	"github.com/sandwichcloud/deli-cli/api"
 	"golang.org/x/net/context/ctxhttp"
@@ -15,13 +14,14 @@ import (
 type PolicyClient struct {
 	APIServer  *string
 	HttpClient *http.Client
+	Type       string
 }
 
-func (client *PolicyClient) Get(name string) (*api.Policy, error) {
+func (client *PolicyClient) Get() (*api.Policy, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
-	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/v1/auth/policies/"+name)
+	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/iam/v1/"+client.Type)
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -48,46 +48,32 @@ func (client *PolicyClient) Get(name string) (*api.Policy, error) {
 	return policy, nil
 }
 
-func (client *PolicyClient) List(limit int, marker string) (*api.PolicyList, error) {
+func (client *PolicyClient) Set(policy api.Policy) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
-	parameters := url.Values{}
 
-	parameters.Add("limit", strconv.FormatInt(int64(limit), 10))
-
-	if len(marker) > 0 {
-		parameters.Add("marker", marker)
-	}
-
-	Url, err := url.Parse(*client.APIServer + "/v1/auth/policies")
-	if err != nil {
-		return nil, err
-	}
-	Url.RawQuery = parameters.Encode()
-
-	response, err := ctxhttp.Get(ctx, client.HttpClient, Url.String())
+	jsonBody, _ := json.Marshal(policy)
+	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/iam/v1/"+client.Type, "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
-			return nil, api.ErrTimedOut
+			return api.ErrTimedOut
 		}
-		return nil, err
+		return err
 	}
 
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	response.Body.Close()
 
-	if response.StatusCode != http.StatusOK {
+	if response.StatusCode != http.StatusNoContent {
 		apiError, err := api.ParseErrors(response.StatusCode, responseData)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		return nil, apiError
+		return apiError
 	}
 
-	policies := &api.PolicyList{}
-	json.Unmarshal(responseData, policies)
-	return policies, nil
+	return nil
 }

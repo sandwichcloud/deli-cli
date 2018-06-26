@@ -12,13 +12,14 @@ import (
 
 type deleteCommand struct {
 	cmd.Command
-	raw      *bool
-	volumeID *string
+	raw     *bool
+	project *string
+	name    *string
 }
 
 func (c *deleteCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("delete", "Delete a volume").Action(c.action)
-	c.volumeID = command.Arg("volume ID", "The volume ID").Required().String()
+	c.name = command.Arg("volume name", "The volume name").Required().String()
 }
 
 func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -26,11 +27,7 @@ func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	err = c.Application.APIClient.Volume().Delete(*c.volumeID)
+	err = c.Application.APIClient.Volume(*c.project).Delete(*c.name)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -40,7 +37,7 @@ func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.P
 		if *c.raw {
 			fmt.Println("{}")
 		} else {
-			logrus.Infof("Volume with the id of '%s' is being deleted", *c.volumeID)
+			logrus.Infof("Volume '%s' is being deleted", *c.name)
 		}
 	}
 	return nil

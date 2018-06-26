@@ -23,34 +23,34 @@ type NetworkClient struct {
 	HttpClient *http.Client
 }
 
-func (client *NetworkClient) Create(name, regionID, portGroup, cidr string, gateway, poolStart, poolEnd net.IP, dnsServers []net.IP) (*api.Network, error) {
+func (client *NetworkClient) Create(name, regionName, portGroup, cidr string, gateway, poolStart, poolEnd net.IP, dnsServers []net.IP) (*api.Network, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
 	type createBody struct {
 		Name       string   `json:"name"`
 		PortGroup  string   `json:"port_group"`
-		Cidr       string   `json:"cidr"`
+		CIDR       string   `json:"cidr"`
 		Gateway    net.IP   `json:"gateway"`
 		DNSServers []net.IP `json:"dns_servers"`
 		PoolStart  net.IP   `json:"pool_start"`
 		PoolEnd    net.IP   `json:"pool_end"`
-		RegionID   string   `json:"region_id"`
+		RegionName string   `json:"region_name"`
 	}
 
 	body := createBody{
 		Name:       name,
 		PortGroup:  portGroup,
-		Cidr:       cidr,
+		CIDR:       cidr,
 		Gateway:    gateway,
 		DNSServers: dnsServers,
 		PoolStart:  poolStart,
 		PoolEnd:    poolEnd,
-		RegionID:   regionID,
+		RegionName: regionName,
 	}
 	jsonBody, _ := json.Marshal(body)
 
-	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/v1/networks", "application/json", bytes.NewBuffer(jsonBody))
+	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/compute/v1/networks", "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -77,11 +77,11 @@ func (client *NetworkClient) Create(name, regionID, portGroup, cidr string, gate
 	return network, nil
 }
 
-func (client *NetworkClient) Get(id string) (*api.Network, error) {
+func (client *NetworkClient) Get(name string) (*api.Network, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
-	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/v1/networks/"+id)
+	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/compute/v1/networks/"+name)
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -108,10 +108,10 @@ func (client *NetworkClient) Get(id string) (*api.Network, error) {
 	return network, nil
 }
 
-func (client *NetworkClient) Delete(id string) error {
+func (client *NetworkClient) Delete(name string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
-	Url, err := url.Parse(*client.APIServer + "/v1/networks/" + id)
+	Url, err := url.Parse(*client.APIServer + "/compute/v1/networks/" + name)
 	if err != nil {
 		return err
 	}
@@ -145,17 +145,13 @@ func (client *NetworkClient) Delete(id string) error {
 	return nil
 }
 
-func (client *NetworkClient) List(name, region_id string, limit int, marker string) (*api.NetworkList, error) {
+func (client *NetworkClient) List(region_name string, limit int, marker string) (*api.NetworkList, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 	parameters := url.Values{}
 
-	if len(name) > 0 {
-		parameters.Add("name", name)
-	}
-
-	if len(region_id) > 0 {
-		parameters.Add("region_id", region_id)
+	if len(region_name) > 0 {
+		parameters.Add("region_name", region_name)
 	}
 
 	parameters.Add("limit", strconv.FormatInt(int64(limit), 10))
@@ -164,7 +160,7 @@ func (client *NetworkClient) List(name, region_id string, limit int, marker stri
 		parameters.Add("marker", marker)
 	}
 
-	Url, err := url.Parse(*client.APIServer + "/v1/networks")
+	Url, err := url.Parse(*client.APIServer + "/compute/v1/networks")
 	if err != nil {
 		return nil, err
 	}

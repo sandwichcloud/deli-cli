@@ -1,4 +1,4 @@
-package member
+package permission
 
 import (
 	"encoding/json"
@@ -19,13 +19,15 @@ import (
 
 type listCommand struct {
 	cmd.Command
-	imageID *string
-	raw     *bool
+	limit  *int
+	marker *string
+	raw    *bool
 }
 
 func (c *listCommand) Register(cmd *kingpin.CmdClause) {
-	command := cmd.Command("list", "List image members").Action(c.action)
-	c.imageID = command.Arg("image ID", "The image ID").Required().String()
+	command := cmd.Command("list", "List permissions").Action(c.action)
+	c.limit = command.Flag("limit", "Number of permissions to show per page").Default("20").Int()
+	c.marker = command.Flag("marker", "Marker Token for the next page of results").String()
 }
 
 func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -33,11 +35,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	imageMembers, err := c.Application.APIClient.Image().MemberList(*c.imageID)
+	permissions, err := c.Application.APIClient.Permission().List(*c.limit, *c.marker)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -45,20 +43,20 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 		return err
 	} else {
 		if *c.raw {
-			imageMembersBytes, _ := json.MarshalIndent(imageMembers, "", "  ")
-			fmt.Println(string(imageMembersBytes))
+			permissionsBytes, _ := json.MarshalIndent(permissions, "", "  ")
+			fmt.Println(string(permissionsBytes))
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Project ID"})
+			table.SetHeader([]string{"Name", "Description"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
-			if len(imageMembers.Links) == 1 {
-				nextPage := imageMembers.Links[0]
+			if len(permissions.Links) == 1 {
+				nextPage := permissions.Links[0]
 				nextPageUrl, _ := url.Parse(nextPage.HREF)
 				table.SetCaption(true, fmt.Sprintf("Next Page Marker %s", nextPageUrl.Query().Get("marker")))
 			}
 
-			for _, imageMember := range imageMembers.Members {
-				table.Append([]string{imageMember.ProjectID.String()})
+			for _, permission := range permissions.Permissions {
+				table.Append([]string{permission.Name, permission.Description})
 			}
 
 			table.Render()

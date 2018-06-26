@@ -34,10 +34,6 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetUnScopedToken()
-	if err != nil {
-		return err
-	}
 	flavors, err := c.Application.APIClient.Flavor().List(*c.limit, *c.marker)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
@@ -50,7 +46,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 			fmt.Println(string(flavorsBytes))
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Name", "ID"})
+			table.SetHeader([]string{"Name"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
 			if len(flavors.Links) == 1 {
 				nextPage := flavors.Links[0]
@@ -59,7 +55,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 			}
 
 			for _, flavor := range flavors.Flavors {
-				table.Append([]string{flavor.Name, flavor.ID.String()})
+				table.Append([]string{flavor.Name})
 			}
 
 			table.Render()

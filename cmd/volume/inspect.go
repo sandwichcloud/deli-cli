@@ -18,13 +18,14 @@ import (
 
 type inspectCommand struct {
 	cmd.Command
-	raw      *bool
-	volumeID *string
+	raw     *bool
+	project *string
+	name    *string
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("inspect", "Inspect a volume").Action(c.action)
-	c.volumeID = command.Arg("volume ID", "The volume ID").String()
+	c.name = command.Arg("volume name", "The volume name").String()
 }
 
 func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -32,11 +33,7 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	volume, err := c.Application.APIClient.Volume().Get(*c.volumeID)
+	volume, err := c.Application.APIClient.Volume(*c.project).Get(*c.name)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -50,7 +47,6 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Property", "Value"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
-			table.SetAutoMergeCells(true)
 
 			for _, field := range structs.Fields(volume) {
 				if field.Kind() == reflect.Slice {

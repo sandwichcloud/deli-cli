@@ -12,12 +12,14 @@ import (
 
 type deleteCommand struct {
 	cmd.Command
-	imageID *string
+	name    *string
+	project *string
+	raw     *bool
 }
 
 func (c *deleteCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("delete", "Delete an image").Action(c.action)
-	c.imageID = command.Arg("image ID", "The image ID").Required().String()
+	c.name = command.Arg("name", "The image name").Required().String()
 }
 
 func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -25,21 +27,17 @@ func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
+	err = c.Application.APIClient.Image(*c.project).Delete(*c.name)
 	if err != nil {
-		return err
-	}
-	err = c.Application.APIClient.Image().Delete(*c.imageID)
-	if err != nil {
-		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
+		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
 		}
 		return err
 	} else {
-		if *raw {
+		if *c.raw {
 			fmt.Println("{}")
 		} else {
-			logrus.Infof("Image with the id of '%s' is being deleted", *c.imageID)
+			logrus.Infof("Image '%s' is being deleted", *c.name)
 		}
 	}
 	return nil

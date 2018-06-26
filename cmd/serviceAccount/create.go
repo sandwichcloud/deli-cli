@@ -13,7 +13,7 @@ import (
 
 type createCommand struct {
 	cmd.Command
-	project bool
+	project *string
 	raw     *bool
 	name    *string
 }
@@ -28,20 +28,15 @@ func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	if c.project {
-		err = c.Application.SetScopedToken()
-	} else {
-		err = c.Application.SetUnScopedToken()
-	}
 	if err != nil {
 		return err
 	}
 
 	var serviceAccount *api.ServiceAccount
-	if c.project {
-		serviceAccount, err = c.Application.APIClient.ProjectServiceAccount().Create(*c.name)
+	if c.project != nil {
+		serviceAccount, err = c.Application.APIClient.ProjectServiceAccount(*c.project).Create(*c.name)
 	} else {
-		serviceAccount, err = c.Application.APIClient.GlobalServiceAccount().Create(*c.name)
+		serviceAccount, err = c.Application.APIClient.SystemServiceAccount().Create(*c.name)
 	}
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
@@ -53,7 +48,7 @@ func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.P
 			serviceAccountBytes, _ := json.MarshalIndent(serviceAccount, "", "  ")
 			fmt.Println(string(serviceAccountBytes))
 		} else {
-			logrus.Infof("Service Account '%s' created with an ID of '%s'", serviceAccount.Name, serviceAccount.ID)
+			logrus.Infof("Service Account '%s' created", serviceAccount.Name)
 		}
 	}
 	return nil

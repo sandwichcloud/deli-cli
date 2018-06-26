@@ -30,7 +30,7 @@ func (projectClient *ProjectClient) Create(name string) (*api.Project, error) {
 	body := createBody{Name: name}
 	jsonBody, _ := json.Marshal(body)
 
-	response, err := ctxhttp.Post(ctx, projectClient.HttpClient, *projectClient.APIServer+"/v1/projects", "application/json", bytes.NewBuffer(jsonBody))
+	response, err := ctxhttp.Post(ctx, projectClient.HttpClient, *projectClient.APIServer+"/iam/v1/projects", "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -57,11 +57,11 @@ func (projectClient *ProjectClient) Create(name string) (*api.Project, error) {
 	return project, nil
 }
 
-func (projectClient *ProjectClient) Get(id string) (*api.Project, error) {
+func (projectClient *ProjectClient) Get(name string) (*api.Project, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
-	response, err := ctxhttp.Get(ctx, projectClient.HttpClient, *projectClient.APIServer+"/v1/projects/"+id)
+	response, err := ctxhttp.Get(ctx, projectClient.HttpClient, *projectClient.APIServer+"/iam/v1/projects/"+name)
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -88,10 +88,10 @@ func (projectClient *ProjectClient) Get(id string) (*api.Project, error) {
 	return project, nil
 }
 
-func (projectClient *ProjectClient) Delete(id string) error {
+func (projectClient *ProjectClient) Delete(name string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
-	Url, err := url.Parse(*projectClient.APIServer + "/v1/projects/" + id)
+	Url, err := url.Parse(*projectClient.APIServer + "/iam/v1/projects/" + name)
 	if err != nil {
 		return err
 	}
@@ -125,19 +125,18 @@ func (projectClient *ProjectClient) Delete(id string) error {
 	return nil
 }
 
-func (projectClient *ProjectClient) List(all bool, limit int, marker string) (*api.ProjectList, error) {
+func (projectClient *ProjectClient) List(limit int, marker string) (*api.ProjectList, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 	parameters := url.Values{}
 
-	parameters.Add("all", strconv.FormatBool(all))
 	parameters.Add("limit", strconv.FormatInt(int64(limit), 10))
 
 	if len(marker) > 0 {
 		parameters.Add("marker", marker)
 	}
 
-	Url, err := url.Parse(*projectClient.APIServer + "/v1/projects")
+	Url, err := url.Parse(*projectClient.APIServer + "/iam/v1/projects")
 	if err != nil {
 		return nil, err
 	}
@@ -170,11 +169,11 @@ func (projectClient *ProjectClient) List(all bool, limit int, marker string) (*a
 	return projects, nil
 }
 
-func (projectClient *ProjectClient) GetQuota() (*api.ProjectQuota, error) {
+func (projectClient *ProjectClient) GetQuota(projectName string) (*api.ProjectQuota, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
-	response, err := ctxhttp.Get(ctx, projectClient.HttpClient, *projectClient.APIServer+"/v1/project-quota")
+	response, err := ctxhttp.Get(ctx, projectClient.HttpClient, *projectClient.APIServer+"/iam/v1/projects/"+projectName+"/quota")
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -201,7 +200,7 @@ func (projectClient *ProjectClient) GetQuota() (*api.ProjectQuota, error) {
 	return projectQuota, nil
 }
 
-func (projectClient *ProjectClient) SetQuota(vcpu, ram, disk int) error {
+func (projectClient *ProjectClient) SetQuota(projectName string, vcpu, ram, disk int) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
@@ -214,199 +213,7 @@ func (projectClient *ProjectClient) SetQuota(vcpu, ram, disk int) error {
 	body := quotaBody{VCPU: vcpu, Ram: ram, Disk: disk}
 	jsonBody, _ := json.Marshal(body)
 
-	response, err := ctxhttp.Post(ctx, projectClient.HttpClient, *projectClient.APIServer+"/v1/project-quota", "application/json", bytes.NewBuffer(jsonBody))
-	if err != nil {
-		if err == context.DeadlineExceeded {
-			return api.ErrTimedOut
-		}
-		return err
-	}
-
-	responseData, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-	response.Body.Close()
-
-	if response.StatusCode != http.StatusNoContent {
-		apiError, err := api.ParseErrors(response.StatusCode, responseData)
-		if err != nil {
-			return err
-		}
-		return apiError
-	}
-
-	return nil
-}
-
-func (projectClient *ProjectClient) AddMember(username, driver string) (*api.ProjectMember, error) {
-	ctx, cancel := api.CreateTimeoutContext()
-	defer cancel()
-
-	type addBody struct {
-		Username string `json:"username"`
-		Driver   string `json:"driver"`
-	}
-
-	body := addBody{
-		Username: username,
-		Driver:   driver,
-	}
-	jsonBody, _ := json.Marshal(body)
-
-	response, err := ctxhttp.Post(ctx, projectClient.HttpClient, *projectClient.APIServer+"/v1/project-members", "application/json", bytes.NewBuffer(jsonBody))
-	if err != nil {
-		if err == context.DeadlineExceeded {
-			return nil, api.ErrTimedOut
-		}
-		return nil, err
-	}
-
-	responseData, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-	response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		apiError, err := api.ParseErrors(response.StatusCode, responseData)
-		if err != nil {
-			return nil, err
-		}
-		return nil, apiError
-	}
-
-	projectMember := &api.ProjectMember{}
-	json.Unmarshal(responseData, projectMember)
-	return projectMember, nil
-}
-
-func (projectClient *ProjectClient) GetMember(id string) (*api.ProjectMember, error) {
-	ctx, cancel := api.CreateTimeoutContext()
-	defer cancel()
-
-	response, err := ctxhttp.Get(ctx, projectClient.HttpClient, *projectClient.APIServer+"/v1/project-members/"+id)
-	if err != nil {
-		if err == context.DeadlineExceeded {
-			return nil, api.ErrTimedOut
-		}
-		return nil, err
-	}
-
-	responseData, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-	response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		apiError, err := api.ParseErrors(response.StatusCode, responseData)
-		if err != nil {
-			return nil, err
-		}
-		return nil, apiError
-	}
-
-	projectMember := &api.ProjectMember{}
-	json.Unmarshal(responseData, projectMember)
-	return projectMember, nil
-}
-
-func (projectClient *ProjectClient) ListMembers(limit int, marker string) (*api.ProjectMemberList, error) {
-	ctx, cancel := api.CreateTimeoutContext()
-	defer cancel()
-	parameters := url.Values{}
-
-	parameters.Add("limit", strconv.FormatInt(int64(limit), 10))
-
-	if len(marker) > 0 {
-		parameters.Add("marker", marker)
-	}
-
-	Url, err := url.Parse(*projectClient.APIServer + "/v1/project-members")
-	if err != nil {
-		return nil, err
-	}
-	Url.RawQuery = parameters.Encode()
-
-	response, err := ctxhttp.Get(ctx, projectClient.HttpClient, Url.String())
-	if err != nil {
-		if err == context.DeadlineExceeded {
-			return nil, api.ErrTimedOut
-		}
-		return nil, err
-	}
-
-	responseData, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-	response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		apiError, err := api.ParseErrors(response.StatusCode, responseData)
-		if err != nil {
-			return nil, err
-		}
-		return nil, apiError
-	}
-
-	projectMemberList := &api.ProjectMemberList{}
-	json.Unmarshal(responseData, projectMemberList)
-	return projectMemberList, nil
-}
-
-func (projectClient *ProjectClient) UpdateMember(id string, roles []string) error {
-	ctx, cancel := api.CreateTimeoutContext()
-	defer cancel()
-
-	type updateBody struct {
-		Roles []string `json:"roles"`
-	}
-
-	body := updateBody{
-		Roles: roles,
-	}
-	jsonBody, _ := json.Marshal(body)
-
-	response, err := ctxhttp.Post(ctx, projectClient.HttpClient, *projectClient.APIServer+"/v1/project-members/"+id, "application/json", bytes.NewBuffer(jsonBody))
-	if err != nil {
-		if err == context.DeadlineExceeded {
-			return api.ErrTimedOut
-		}
-		return err
-	}
-
-	responseData, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-	response.Body.Close()
-
-	if response.StatusCode != http.StatusNoContent {
-		apiError, err := api.ParseErrors(response.StatusCode, responseData)
-		if err != nil {
-			return err
-		}
-		return apiError
-	}
-
-	return nil
-}
-
-func (projectClient *ProjectClient) RemoveMember(id string) error {
-	ctx, cancel := api.CreateTimeoutContext()
-	defer cancel()
-	Url, err := url.Parse(*projectClient.APIServer + "/v1/project-members/" + id)
-	if err != nil {
-		return err
-	}
-
-	req, err := http.NewRequest("DELETE", Url.String(), nil)
-	if err != nil {
-		return err
-	}
-	response, err := ctxhttp.Do(ctx, projectClient.HttpClient, req)
+	response, err := ctxhttp.Post(ctx, projectClient.HttpClient, *projectClient.APIServer+"/iam/v1/projects/"+projectName+"/quota", "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return api.ErrTimedOut

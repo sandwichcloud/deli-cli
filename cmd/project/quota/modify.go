@@ -12,10 +12,11 @@ import (
 
 type modifyCommand struct {
 	cmd.Command
-	raw  *bool
-	vcpu *int
-	ram  *int
-	disk *int
+	raw     *bool
+	project *string
+	vcpu    *int
+	ram     *int
+	disk    *int
 }
 
 func (c *modifyCommand) Register(cmd *kingpin.CmdClause) {
@@ -30,15 +31,7 @@ func (c *modifyCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	tokenInfo, err := c.Application.APIClient.Auth().TokenInfo()
-	if err != nil {
-		return err
-	}
-	err = c.Application.APIClient.Project().SetQuota(*c.vcpu, *c.ram, *c.disk)
+	err = c.Application.APIClient.Project().SetQuota(*c.project, *c.vcpu, *c.ram, *c.disk)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -48,7 +41,7 @@ func (c *modifyCommand) action(element *kingpin.ParseElement, context *kingpin.P
 		if *c.raw {
 			fmt.Println("{}")
 		} else {
-			logrus.Infof("Updated the quota for the project '%s'", tokenInfo.ProjectID)
+			logrus.Infof("Updated the quota for the project '%s'", *c.project)
 		}
 	}
 	return nil

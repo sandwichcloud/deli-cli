@@ -17,12 +17,14 @@ import (
 
 type inspectCommand struct {
 	cmd.Command
-	imageID *string
+	name    *string
+	project *string
+	raw     *bool
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("inspect", "Inspect an image").Action(c.action)
-	c.imageID = command.Arg("image ID", "The image ID").String()
+	c.name = command.Arg("image name", "The image name").String()
 }
 
 func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -30,18 +32,14 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
+	image, err := c.Application.APIClient.Image(*c.project).Get(*c.name)
 	if err != nil {
-		return err
-	}
-	image, err := c.Application.APIClient.Image().Get(*c.imageID)
-	if err != nil {
-		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
+		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
 		}
 		return err
 	} else {
-		if *raw {
+		if *c.raw {
 			imageBytes, _ := json.MarshalIndent(image, "", "  ")
 			fmt.Println(string(imageBytes))
 		} else {

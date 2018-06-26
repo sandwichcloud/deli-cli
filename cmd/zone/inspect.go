@@ -17,13 +17,13 @@ import (
 
 type inspectCommand struct {
 	cmd.Command
-	zoneID *string
-	raw    *bool
+	name *string
+	raw  *bool
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("inspect", "Inspect a zone").Action(c.action)
-	c.zoneID = command.Arg("zoneID", "The zone ID").Required().String()
+	c.name = command.Arg("name", "The zone name").Required().String()
 }
 
 func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -31,11 +31,7 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetUnScopedToken()
-	if err != nil {
-		return err
-	}
-	zone, err := c.Application.APIClient.Zone().Get(*c.zoneID)
+	zone, err := c.Application.APIClient.Zone().Get(*c.name)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())

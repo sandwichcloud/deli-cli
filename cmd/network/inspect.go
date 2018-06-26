@@ -19,12 +19,12 @@ import (
 
 type inspectCommand struct {
 	cmd.Command
-	networkID *string
+	name *string
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("inspect", "Inspect a network").Action(c.action)
-	c.networkID = command.Arg("network ID", "The network ID").String()
+	c.name = command.Arg("name", "The network ID").String()
 }
 
 func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -32,11 +32,7 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetUnScopedToken()
-	if err != nil {
-		return err
-	}
-	project, err := c.Application.APIClient.Network().Get(*c.networkID)
+	project, err := c.Application.APIClient.Network().Get(*c.name)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -50,7 +46,6 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Property", "Value"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
-			table.SetAutoMergeCells(true)
 
 			for _, field := range structs.Fields(project) {
 				if field.Kind() == reflect.Slice && reflect.TypeOf(net.IP{}) != reflect.TypeOf(field.Value()) {

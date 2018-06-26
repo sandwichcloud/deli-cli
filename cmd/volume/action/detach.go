@@ -12,13 +12,14 @@ import (
 
 type DetachCommand struct {
 	cmd.Command
-	Raw      *bool
-	volumeID *string
+	Raw     *bool
+	Project *string
+	name    *string
 }
 
 func (c *DetachCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("detach", "Detach a Volume from an Instance.").Action(c.action)
-	c.volumeID = command.Arg("volume ID", "The volume ID").Required().String()
+	c.name = command.Arg("volume name", "The volume name").Required().String()
 }
 
 func (c *DetachCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -26,11 +27,7 @@ func (c *DetachCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	err = c.Application.APIClient.Volume().ActionDetach(*c.volumeID)
+	err = c.Application.APIClient.Volume(*c.Project).ActionDetach(*c.name)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.Raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -40,7 +37,7 @@ func (c *DetachCommand) action(element *kingpin.ParseElement, context *kingpin.P
 		if *c.Raw {
 			fmt.Println("{}")
 		} else {
-			logrus.Infof("The volume '%s' being detached from the instance", *c.volumeID)
+			logrus.Infof("The volume '%s' being detached from the instance", *c.name)
 		}
 	}
 	return nil

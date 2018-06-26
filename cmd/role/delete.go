@@ -12,14 +12,14 @@ import (
 
 type deleteCommand struct {
 	cmd.Command
-	project bool
+	project *string
 	raw     *bool
-	roleID  *string
+	name    *string
 }
 
 func (c *deleteCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("delete", "delete a role").Action(c.action)
-	c.roleID = command.Arg("role ID", "The role ID").String()
+	c.name = command.Arg("role name", "The role name").String()
 }
 
 func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -27,18 +27,13 @@ func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	if c.project {
-		err = c.Application.SetScopedToken()
-	} else {
-		err = c.Application.SetUnScopedToken()
-	}
 	if err != nil {
 		return err
 	}
-	if c.project {
-		err = c.Application.APIClient.ProjectRole().Delete(*c.roleID)
+	if c.project != nil {
+		err = c.Application.APIClient.ProjectRole(*c.project).Delete(*c.name)
 	} else {
-		err = c.Application.APIClient.GlobalRole().Delete(*c.roleID)
+		err = c.Application.APIClient.SystemRole().Delete(*c.name)
 	}
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
@@ -49,7 +44,7 @@ func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.P
 		if *c.raw {
 			fmt.Println("{}")
 		} else {
-			logrus.Infof("Role with the id of %s is being deleted.", *c.roleID)
+			logrus.Infof("Role '%s' is being deleted.", *c.name)
 		}
 	}
 	return nil

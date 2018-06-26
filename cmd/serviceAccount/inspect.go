@@ -17,14 +17,14 @@ import (
 
 type inspectCommand struct {
 	cmd.Command
-	project          bool
-	raw              *bool
-	serviceAccountID *string
+	project *string
+	raw     *bool
+	name    *string
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("inspect", "Inspect a service account").Action(c.action)
-	c.serviceAccountID = command.Arg("service account ID", "The service account ID").String()
+	c.name = command.Arg("name", "The service account name").String()
 }
 
 func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -32,20 +32,15 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 	if err != nil {
 		return err
 	}
-	if c.project {
-		err = c.Application.SetScopedToken()
-	} else {
-		err = c.Application.SetUnScopedToken()
-	}
 	if err != nil {
 		return err
 	}
 
 	var serviceAccount *api.ServiceAccount
-	if c.project {
-		serviceAccount, err = c.Application.APIClient.ProjectServiceAccount().Get(*c.serviceAccountID)
+	if c.project != nil {
+		serviceAccount, err = c.Application.APIClient.ProjectServiceAccount(*c.project).Get(*c.name)
 	} else {
-		serviceAccount, err = c.Application.APIClient.GlobalServiceAccount().Get(*c.serviceAccountID)
+		serviceAccount, err = c.Application.APIClient.SystemServiceAccount().Get(*c.name)
 	}
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
@@ -60,9 +55,11 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Property", "Value"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
-			table.SetAutoMergeCells(true)
 
 			for _, field := range structs.Fields(serviceAccount) {
+				if field.Tag("json") == "keys" {
+					continue
+				}
 				if field.Kind() == reflect.Slice {
 					v := reflect.ValueOf(field.Value())
 					for i := 0; i < v.Len(); i++ {

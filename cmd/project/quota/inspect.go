@@ -17,7 +17,8 @@ import (
 
 type inspectCommand struct {
 	cmd.Command
-	raw *bool
+	raw     *bool
+	project *string
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
@@ -29,11 +30,7 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	projectQuota, err := c.Application.APIClient.Project().GetQuota()
+	projectQuota, err := c.Application.APIClient.Project().GetQuota(*c.project)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())

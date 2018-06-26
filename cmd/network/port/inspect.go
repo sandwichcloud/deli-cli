@@ -17,13 +17,14 @@ import (
 
 type inspectCommand struct {
 	cmd.Command
-	raw    *bool
-	portID *string
+	project *string
+	raw     *bool
+	portID  *string
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("inspect", "Inspect a network port").Action(c.action)
-	c.portID = command.Arg("network port ID", "The network port ID").Required().String()
+	c.portID = command.Arg("id", "The network port ID").Required().String()
 }
 
 func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -31,11 +32,7 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	keypair, err := c.Application.APIClient.NetworkPort().Get(*c.portID)
+	keypair, err := c.Application.APIClient.NetworkPort(*c.project).Get(*c.portID)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -49,14 +46,9 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Property", "Value"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
-			table.SetAutoMergeCells(true)
 
 			for _, field := range structs.Fields(keypair) {
-				if field.Tag("json") == "public_key" {
-					table.Append([]string{field.Tag("json"), field.Value().(string)[:33] + "..."})
-				} else {
-					table.Append([]string{field.Tag("json"), utils.InterfaceToString(field.Value())})
-				}
+				table.Append([]string{field.Tag("json"), utils.InterfaceToString(field.Value())})
 			}
 			table.Render()
 		}

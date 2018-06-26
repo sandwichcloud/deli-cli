@@ -34,10 +34,6 @@ func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetUnScopedToken()
-	if err != nil {
-		return err
-	}
 	region, err := c.Application.APIClient.Region().Create(*c.name, *c.datacenter, *c.imageDatastore, *c.imageFolder)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
@@ -49,7 +45,7 @@ func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.P
 			regionBytes, _ := json.MarshalIndent(region, "", "  ")
 			fmt.Println(string(regionBytes))
 		} else {
-			logrus.Infof("Region '%s' created with an ID of '%s'", region.Name, region.ID)
+			logrus.Infof("Region '%s' created", region.Name)
 		}
 	}
 	return nil

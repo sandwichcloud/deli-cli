@@ -12,13 +12,14 @@ import (
 
 type deleteCommand struct {
 	cmd.Command
-	raw    *bool
-	portID *string
+	project *string
+	raw     *bool
+	portID  *string
 }
 
 func (c *deleteCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("delete", "Delete a network port").Action(c.action)
-	c.portID = command.Arg("network port ID", "The network port ID").Required().String()
+	c.portID = command.Arg("id", "The network port ID").Required().String()
 }
 
 func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -26,11 +27,7 @@ func (c *deleteCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetScopedToken()
-	if err != nil {
-		return err
-	}
-	err = c.Application.APIClient.NetworkPort().Delete(*c.portID)
+	err = c.Application.APIClient.NetworkPort(*c.project).Delete(*c.portID)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())

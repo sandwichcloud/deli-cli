@@ -19,46 +19,47 @@ import (
 )
 
 type InstanceClient struct {
-	APIServer  *string
-	HttpClient *http.Client
+	APIServer   *string
+	HttpClient  *http.Client
+	ProjectName string
 }
 
-func (client *InstanceClient) Create(name, imageID, regionID, zoneID, networkID, serviceAccountID, flavorID string, disk int, keypairIDs []string, initialVolumes []api.InstanceInitialVolume, tags map[string]string, userData string) (*api.Instance, error) {
+func (client *InstanceClient) Create(name, imageName, regionName, zoneName, networkName, serviceAccountName, flavorName string, disk int, keypairNames []string, initialVolumes []api.InstanceInitialVolume, tags map[string]string, userData string) (*api.Instance, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
 	type createBody struct {
-		Name             string                      `json:"name"`
-		ImageID          string                      `json:"image_id"`
-		RegionID         string                      `json:"region_id"`
-		ZoneID           string                      `json:"zone_id,omitempty"`
-		ServiceAccountID string                      `json:"service_account_id,omitempty"`
-		NetworkID        string                      `json:"network_id"`
-		FlavorId         string                      `json:"flavor_id"`
-		Disk             int                         `json:"disk,omitempty"`
-		KeypairIDs       []string                    `json:"keypair_ids,omitempty"`
-		InitialVolumes   []api.InstanceInitialVolume `json:"initial_volumes"`
-		Tags             map[string]string           `json:"tags"`
-		UserData         string                      `json:"user_data"`
+		Name               string                      `json:"name"`
+		ImageName          string                      `json:"image_name"`
+		RegionName         string                      `json:"region_name"`
+		ZoneName           string                      `json:"zone_name,omitempty"`
+		ServiceAccountName string                      `json:"service_account_name,omitempty"`
+		NetworkName        string                      `json:"network_name"`
+		FlavorName         string                      `json:"flavor_name"`
+		Disk               int                         `json:"disk,omitempty"`
+		KeypairNames       []string                    `json:"keypair_names,omitempty"`
+		InitialVolumes     []api.InstanceInitialVolume `json:"initial_volumes"`
+		Tags               map[string]string           `json:"tags"`
+		UserData           string                      `json:"user_data"`
 	}
 
 	body := createBody{
-		Name:             name,
-		ImageID:          imageID,
-		RegionID:         regionID,
-		ZoneID:           zoneID,
-		NetworkID:        networkID,
-		ServiceAccountID: serviceAccountID,
-		FlavorId:         flavorID,
-		Disk:             disk,
-		KeypairIDs:       keypairIDs,
-		InitialVolumes:   initialVolumes,
-		Tags:             tags,
-		UserData:         userData,
+		Name:               name,
+		ImageName:          imageName,
+		RegionName:         regionName,
+		ZoneName:           zoneName,
+		NetworkName:        networkName,
+		ServiceAccountName: serviceAccountName,
+		FlavorName:         flavorName,
+		Disk:               disk,
+		KeypairNames:       keypairNames,
+		InitialVolumes:     initialVolumes,
+		Tags:               tags,
+		UserData:           userData,
 	}
 	jsonBody, _ := json.Marshal(body)
 
-	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/v1/instances", "application/json", bytes.NewBuffer(jsonBody))
+	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+"/compute/v1/projects/"+client.ProjectName+"/instances", "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -85,11 +86,11 @@ func (client *InstanceClient) Create(name, imageID, regionID, zoneID, networkID,
 	return instance, nil
 }
 
-func (client *InstanceClient) Get(id string) (*api.Instance, error) {
+func (client *InstanceClient) Get(name string) (*api.Instance, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
-	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/v1/instances/"+id)
+	response, err := ctxhttp.Get(ctx, client.HttpClient, *client.APIServer+"/compute/v1/projects/"+client.ProjectName+"/instances/"+name)
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -116,10 +117,10 @@ func (client *InstanceClient) Get(id string) (*api.Instance, error) {
 	return instance, nil
 }
 
-func (client *InstanceClient) Delete(id string) error {
+func (client *InstanceClient) Delete(name string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
-	Url, err := url.Parse(*client.APIServer + "/v1/instances/" + id)
+	Url, err := url.Parse(*client.APIServer + "/compute/v1/projects/" + client.ProjectName + "/instances/" + name)
 	if err != nil {
 		return err
 	}
@@ -153,13 +154,13 @@ func (client *InstanceClient) Delete(id string) error {
 	return nil
 }
 
-func (client *InstanceClient) List(imageID string, limit int, marker string) (*api.InstanceList, error) {
+func (client *InstanceClient) List(imageName string, limit int, marker string) (*api.InstanceList, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 	parameters := url.Values{}
 
-	if len(imageID) > 0 {
-		parameters.Add("image_id", imageID)
+	if len(imageName) > 0 {
+		parameters.Add("image_name", imageName)
 	}
 
 	parameters.Add("limit", strconv.FormatInt(int64(limit), 10))
@@ -168,7 +169,7 @@ func (client *InstanceClient) List(imageID string, limit int, marker string) (*a
 		parameters.Add("marker", marker)
 	}
 
-	Url, err := url.Parse(*client.APIServer + "/v1/instances")
+	Url, err := url.Parse(*client.APIServer + "/compute/v1/projects/" + client.ProjectName + "/instances")
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +202,7 @@ func (client *InstanceClient) List(imageID string, limit int, marker string) (*a
 	return instances, nil
 }
 
-func (client *InstanceClient) ActionStop(id string, hard bool, timeout int) error {
+func (client *InstanceClient) ActionStop(name string, hard bool, timeout int) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
@@ -213,7 +214,7 @@ func (client *InstanceClient) ActionStop(id string, hard bool, timeout int) erro
 	body := stopBody{Hard: hard, Timeout: timeout}
 	jsonBody, _ := json.Marshal(body)
 
-	req, err := http.NewRequest(http.MethodPut, *client.APIServer+fmt.Sprintf("/v1/instances/%s/action/stop", id), bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequest(http.MethodPut, *client.APIServer+fmt.Sprintf("/compute/v1/projects/"+client.ProjectName+"/instances/%s/action/stop", name), bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return err
 	}
@@ -242,11 +243,11 @@ func (client *InstanceClient) ActionStop(id string, hard bool, timeout int) erro
 	return nil
 }
 
-func (client *InstanceClient) ActionStart(id string) error {
+func (client *InstanceClient) ActionStart(name string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
-	req, err := http.NewRequest(http.MethodPut, *client.APIServer+fmt.Sprintf("/v1/instances/%s/action/start", id), nil)
+	req, err := http.NewRequest(http.MethodPut, *client.APIServer+fmt.Sprintf("/compute/v1/projects/"+client.ProjectName+"/instances/%s/action/start", name), nil)
 	if err != nil {
 		return err
 	}
@@ -274,7 +275,7 @@ func (client *InstanceClient) ActionStart(id string) error {
 	return nil
 }
 
-func (client *InstanceClient) ActionRestart(id string, hard bool, timeout int) error {
+func (client *InstanceClient) ActionRestart(name string, hard bool, timeout int) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
@@ -286,7 +287,7 @@ func (client *InstanceClient) ActionRestart(id string, hard bool, timeout int) e
 	body := restartBody{Hard: hard, Timeout: timeout}
 	jsonBody, _ := json.Marshal(body)
 
-	req, err := http.NewRequest(http.MethodPut, *client.APIServer+fmt.Sprintf("/v1/instances/%s/action/restart", id), bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequest(http.MethodPut, *client.APIServer+fmt.Sprintf("/compute/v1/projects/"+client.ProjectName+"/instances/%s/action/restart", name), bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return err
 	}
@@ -315,7 +316,7 @@ func (client *InstanceClient) ActionRestart(id string, hard bool, timeout int) e
 	return nil
 }
 
-func (client *InstanceClient) ActionImage(id string, name string) (*api.Image, error) {
+func (client *InstanceClient) ActionImage(instanceName string, imageName string) (*api.Image, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
@@ -323,10 +324,10 @@ func (client *InstanceClient) ActionImage(id string, name string) (*api.Image, e
 		Name string `json:"name"`
 	}
 
-	body := createBody{Name: name}
+	body := createBody{Name: imageName}
 	jsonBody, _ := json.Marshal(body)
 
-	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+fmt.Sprintf("/v1/instances/%s/action/image", id), "application/json", bytes.NewBuffer(jsonBody))
+	response, err := ctxhttp.Post(ctx, client.HttpClient, *client.APIServer+fmt.Sprintf("/compute/v1/projects/"+client.ProjectName+"/instances/%s/action/image", instanceName), "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut

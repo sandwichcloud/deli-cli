@@ -19,7 +19,6 @@ import (
 
 type listCommand struct {
 	cmd.Command
-	name   *string
 	limit  *int
 	marker *string
 	raw    *bool
@@ -27,7 +26,6 @@ type listCommand struct {
 
 func (c *listCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("list", "List regions").Action(c.action)
-	c.name = command.Flag("name", "The name to filter by").Default("").String()
 	c.limit = command.Flag("limit", "Number of regions to show per page").Default("20").Int()
 	c.marker = command.Flag("marker", "Marker Token for the next page of results").String()
 }
@@ -37,11 +35,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 	if err != nil {
 		return err
 	}
-	err = c.Application.SetUnScopedToken()
-	if err != nil {
-		return err
-	}
-	regions, err := c.Application.APIClient.Region().List(*c.name, *c.limit, *c.marker)
+	regions, err := c.Application.APIClient.Region().List(*c.limit, *c.marker)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -53,7 +47,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 			fmt.Println(string(regionsBytes))
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Name", "ID"})
+			table.SetHeader([]string{"Name"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
 			if len(regions.Links) == 1 {
 				nextPage := regions.Links[0]
@@ -62,7 +56,7 @@ func (c *listCommand) action(element *kingpin.ParseElement, context *kingpin.Par
 			}
 
 			for _, region := range regions.Regions {
-				table.Append([]string{region.Name, region.ID.String()})
+				table.Append([]string{region.Name})
 			}
 
 			table.Render()

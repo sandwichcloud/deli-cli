@@ -9,6 +9,7 @@ import (
 	"github.com/sandwichcloud/deli-cli/cmd/keypair"
 	"github.com/sandwichcloud/deli-cli/cmd/metadata"
 	"github.com/sandwichcloud/deli-cli/cmd/network"
+	"github.com/sandwichcloud/deli-cli/cmd/permission"
 	"github.com/sandwichcloud/deli-cli/cmd/policy"
 	"github.com/sandwichcloud/deli-cli/cmd/project"
 	"github.com/sandwichcloud/deli-cli/cmd/region"
@@ -50,11 +51,14 @@ func main() {
 	instanceCommand := instance.Command{}
 	instanceCommand.Register(app)
 
-	policyCommand := policy.Command{}
-	policyCommand.Register(app)
+	permissionCommand := permission.Command{}
+	permissionCommand.Register(app)
 
 	roleCommand := role.Command{}
 	roleCommand.Register(app)
+
+	policyCommand := policy.Command{}
+	policyCommand.Register(app)
 
 	serviceAccountCommand := serviceAccount.Command{}
 	serviceAccountCommand.Register(app)

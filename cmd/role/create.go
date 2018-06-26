@@ -13,16 +13,16 @@ import (
 
 type createCommand struct {
 	cmd.Command
-	project  bool
-	raw      *bool
-	name     *string
-	policies *[]string
+	project     *string
+	raw         *bool
+	name        *string
+	permissions *[]string
 }
 
 func (c *createCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("create", "Create a role").Action(c.action)
 	c.name = command.Arg("name", "The role name").Required().String()
-	c.policies = command.Flag("policy", "Policy to add to the role").Strings()
+	c.permissions = command.Flag("permission", "Permission to add to the role").Strings()
 }
 
 func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -30,23 +30,18 @@ func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.P
 	if err != nil {
 		return err
 	}
-	if c.project {
-		err = c.Application.SetScopedToken()
-	} else {
-		err = c.Application.SetUnScopedToken()
-	}
 	if err != nil {
 		return err
 	}
-	policies := make([]string, 0)
-	if *c.policies != nil {
-		policies = *c.policies
+	permissions := make([]string, 0)
+	if *c.permissions != nil {
+		permissions = *c.permissions
 	}
 	var role *api.Role
-	if c.project {
-		role, err = c.Application.APIClient.ProjectRole().Create(*c.name, policies)
+	if c.project != nil {
+		role, err = c.Application.APIClient.ProjectRole(*c.project).Create(*c.name, permissions)
 	} else {
-		role, err = c.Application.APIClient.GlobalRole().Create(*c.name, policies)
+		role, err = c.Application.APIClient.SystemRole().Create(*c.name, permissions)
 	}
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
@@ -58,7 +53,7 @@ func (c *createCommand) action(element *kingpin.ParseElement, context *kingpin.P
 			roleBytes, _ := json.MarshalIndent(role, "", "  ")
 			fmt.Println(string(roleBytes))
 		} else {
-			logrus.Infof("Role '%s' created with an ID of '%s'", role.Name, role.ID)
+			logrus.Infof("Role '%s' created", role.Name)
 		}
 	}
 	return nil

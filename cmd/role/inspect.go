@@ -17,14 +17,14 @@ import (
 
 type inspectCommand struct {
 	cmd.Command
-	project bool
+	project *string
 	raw     *bool
-	roleID  *string
+	name    *string
 }
 
 func (c *inspectCommand) Register(cmd *kingpin.CmdClause) {
 	command := cmd.Command("inspect", "Inspect a role").Action(c.action)
-	c.roleID = command.Arg("role ID", "The role ID").String()
+	c.name = command.Arg("name", "The role name").String()
 }
 
 func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
@@ -32,19 +32,14 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 	if err != nil {
 		return err
 	}
-	if c.project {
-		err = c.Application.SetScopedToken()
-	} else {
-		err = c.Application.SetUnScopedToken()
-	}
 	if err != nil {
 		return err
 	}
 	var role *api.Role
-	if c.project {
-		role, err = c.Application.APIClient.ProjectRole().Get(*c.roleID)
+	if c.project != nil {
+		role, err = c.Application.APIClient.ProjectRole(*c.project).Get(*c.name)
 	} else {
-		role, err = c.Application.APIClient.GlobalRole().Get(*c.roleID)
+		role, err = c.Application.APIClient.SystemRole().Get(*c.name)
 	}
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
@@ -59,7 +54,6 @@ func (c *inspectCommand) action(element *kingpin.ParseElement, context *kingpin.
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Property", "Value"})
 			table.SetAlignment(tablewriter.ALIGN_LEFT)
-			table.SetAutoMergeCells(true)
 
 			for _, field := range structs.Fields(role) {
 				if field.Kind() == reflect.Slice {

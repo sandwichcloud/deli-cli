@@ -24,6 +24,7 @@ import (
 
 type generateCommand struct {
 	cmd.Command
+	project *string
 	raw     *bool
 	name    *string
 	keyPath *string
@@ -38,10 +39,6 @@ func (c *generateCommand) Register(cmd *kingpin.CmdClause) {
 
 func (c *generateCommand) action(element *kingpin.ParseElement, context *kingpin.ParseContext) error {
 	err := c.Application.LoadCreds()
-	if err != nil {
-		return err
-	}
-	err = c.Application.SetScopedToken()
 	if err != nil {
 		return err
 	}
@@ -68,7 +65,7 @@ func (c *generateCommand) action(element *kingpin.ParseElement, context *kingpin
 	pubKey, err := ssh.NewPublicKey(&privateKey.PublicKey)
 	publicKey := string(ssh.MarshalAuthorizedKey(pubKey))
 
-	keypair, err := c.Application.APIClient.Keypair().Create(*c.name, publicKey)
+	keypair, err := c.Application.APIClient.Keypair(*c.project).Create(*c.name, publicKey)
 	if err != nil {
 		if apiError, ok := err.(api.APIErrorInterface); ok && *c.raw {
 			err = errors.New(apiError.ToRawJSON())
@@ -84,7 +81,7 @@ func (c *generateCommand) action(element *kingpin.ParseElement, context *kingpin
 			keypairBytes, _ := json.MarshalIndent(keyPairMap, "", "  ")
 			fmt.Println(string(keypairBytes))
 		} else {
-			logrus.Infof("Keypair '%s' created with an ID of '%s' and saved to '%s'", keypair.Name, keypair.ID, path.Join(keyPath, "id_"+*c.name))
+			logrus.Infof("Keypair '%s' created and saved to '%s'", keypair.Name, path.Join(keyPath, "id_"+*c.name))
 		}
 	}
 

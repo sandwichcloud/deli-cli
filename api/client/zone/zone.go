@@ -21,13 +21,13 @@ type ZoneClient struct {
 	HttpClient *http.Client
 }
 
-func (zoneClient *ZoneClient) Create(name, regionID, vmCluster, vmDatastore, vmFolder string, coreProvisionPercent, ramProvisionPercent int) (*api.Zone, error) {
+func (zoneClient *ZoneClient) Create(name, regionName, vmCluster, vmDatastore, vmFolder string, coreProvisionPercent, ramProvisionPercent int) (*api.Zone, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
 	type createBody struct {
 		Name                 string `json:"name"`
-		RegionID             string `json:"region_id"`
+		RegionName           string `json:"region_name"`
 		VMCluster            string `json:"vm_cluster"`
 		VMDatastore          string `json:"vm_datastore"`
 		VMFolder             string `json:"vm_folder,omitempty"`
@@ -37,7 +37,7 @@ func (zoneClient *ZoneClient) Create(name, regionID, vmCluster, vmDatastore, vmF
 
 	body := createBody{
 		Name:                 name,
-		RegionID:             regionID,
+		RegionName:           regionName,
 		VMCluster:            vmCluster,
 		VMDatastore:          vmDatastore,
 		CoreProvisionPercent: coreProvisionPercent,
@@ -50,7 +50,7 @@ func (zoneClient *ZoneClient) Create(name, regionID, vmCluster, vmDatastore, vmF
 
 	jsonBody, _ := json.Marshal(body)
 
-	response, err := ctxhttp.Post(ctx, zoneClient.HttpClient, *zoneClient.APIServer+"/v1/zones", "application/json", bytes.NewBuffer(jsonBody))
+	response, err := ctxhttp.Post(ctx, zoneClient.HttpClient, *zoneClient.APIServer+"/location/v1/zones", "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -77,11 +77,11 @@ func (zoneClient *ZoneClient) Create(name, regionID, vmCluster, vmDatastore, vmF
 	return zone, nil
 }
 
-func (zoneClient *ZoneClient) Get(id string) (*api.Zone, error) {
+func (zoneClient *ZoneClient) Get(name string) (*api.Zone, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
-	response, err := ctxhttp.Get(ctx, zoneClient.HttpClient, *zoneClient.APIServer+"/v1/zones/"+id)
+	response, err := ctxhttp.Get(ctx, zoneClient.HttpClient, *zoneClient.APIServer+"/location/v1/zones/"+name)
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			return nil, api.ErrTimedOut
@@ -108,10 +108,10 @@ func (zoneClient *ZoneClient) Get(id string) (*api.Zone, error) {
 	return zone, nil
 }
 
-func (zoneClient *ZoneClient) Delete(id string) error {
+func (zoneClient *ZoneClient) Delete(name string) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
-	Url, err := url.Parse(*zoneClient.APIServer + "/v1/zones/" + id)
+	Url, err := url.Parse(*zoneClient.APIServer + "/location/v1/zones/" + name)
 	if err != nil {
 		return err
 	}
@@ -145,13 +145,13 @@ func (zoneClient *ZoneClient) Delete(id string) error {
 	return nil
 }
 
-func (zoneClient *ZoneClient) List(regionID string, limit int, marker string) (*api.ZoneList, error) {
+func (zoneClient *ZoneClient) List(regionName string, limit int, marker string) (*api.ZoneList, error) {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 	parameters := url.Values{}
 
-	if len(regionID) > 0 {
-		parameters.Add("region_id", regionID)
+	if len(regionName) > 0 {
+		parameters.Add("region_name", regionName)
 	}
 
 	parameters.Add("limit", strconv.FormatInt(int64(limit), 10))
@@ -160,7 +160,7 @@ func (zoneClient *ZoneClient) List(regionID string, limit int, marker string) (*
 		parameters.Add("marker", marker)
 	}
 
-	Url, err := url.Parse(*zoneClient.APIServer + "/v1/zones")
+	Url, err := url.Parse(*zoneClient.APIServer + "/location/v1/zones")
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +193,7 @@ func (zoneClient *ZoneClient) List(regionID string, limit int, marker string) (*
 	return zones, nil
 }
 
-func (zoneClient *ZoneClient) ActionSchedule(id string, schedulable bool) error {
+func (zoneClient *ZoneClient) ActionSchedule(name string, schedulable bool) error {
 	ctx, cancel := api.CreateTimeoutContext()
 	defer cancel()
 
@@ -204,7 +204,7 @@ func (zoneClient *ZoneClient) ActionSchedule(id string, schedulable bool) error 
 	body := stopBody{Schedulable: schedulable}
 	jsonBody, _ := json.Marshal(body)
 
-	req, err := http.NewRequest(http.MethodPut, *zoneClient.APIServer+fmt.Sprintf("/v1/zones/%s/action/schedule", id), bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequest(http.MethodPut, *zoneClient.APIServer+fmt.Sprintf("/location/v1/zones/%s/action/schedule", name), bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return err
 	}

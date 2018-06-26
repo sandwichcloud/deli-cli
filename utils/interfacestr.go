@@ -10,7 +10,7 @@ import (
 func InterfaceToString(i interface{}) string {
 	switch v := i.(type) {
 	case time.Time:
-		return v.In(time.Now().Location()).String()
+		return v.In(time.Now().Location()).Format("2006-01-02 15:04:05 -0700 MST")
 	case bool:
 		return strconv.FormatBool(i.(bool))
 	case int:
