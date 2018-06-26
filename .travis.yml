@@ -9,8 +9,6 @@ addons:
       - docker-ce=18.03.1~ce-0~ubuntu
 install:
 - docker --version
-- curl https://glide.sh/get | sh
-- glide install
 env:
   global:
     - secure: Xir3AwIKr07bPyLg8d3hiYCSnKQpRo4i2qNDQVLNJztgBHBcYQCs/Wlz9+yHTXzndyBhbmdDEnJ2GnL5UvNkuVeNud6tp76/obtXelaIrjiTDHigea0vTnhC3WV9CcA7rHDp9pgv5lGfUFUUU+96zDMfcLH7fKtAb6XOPiz/UNoqWNYez6FyWpJu0pzgM7NCF/XU2HAHgI+cnUETk9IdYypS1CyWsrJMuJumj8XNZzNKKNV+64KPYuE1UgJXRbmcgqnpReYAx7bJs8voFUojKNOL58fINjcYgHOPmk+3ej33Dj5QA63Co5Bwx6cDhaAJGBzK79iSjMMe16s7dTUw7DV5YMFLsVBOqXsJ508H8xF8S0pBoe37kc3/ra7Gcc5ZRV7eGRstfEhK+kvqlcvwqfT2o1Kiu7moIo9aDfXAHMvyFqxc9LyO0e+6UdW7o2OvlS5XA314DVS/sVhXF9EmZNTepM1qTkwaQJMN2CDJ0bThvR2ebE32tMMIdyWN+xoOd5lgEFCUPGd5i0hY8vU02LiiFRaU2BXiethuqrVbWs/2EsKPTVGzKV6EU4T3Pggq9PgJeHen7IXppGp0BbxZ6NX3tJdrtPtLaqdVMPoaGvfozLQQmh16aPs5aqvBIrMlyfop734CrwiZ6kH3VpdfS0MZhQwDf2K5y4ZN8kz3AQU=
